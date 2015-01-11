@@ -1,5 +1,5 @@
 #include "encoder_driver.hpp"
-#include "debug.hpp" 
+#include <boost/log/trivial.hpp>
 #include <sstream>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
@@ -23,7 +23,7 @@ void driver_encoder::connect_to_m3d(std::string IP)
         if (error) throw boost::system::system_error(error);
    bool t;
         getEncoderRes(t);
-   _log_info("m3d encoder res: %d", encRes);
+		BOOST_LOG_TRIVIAL(info) <<"m3d encoder res:"<< encRes;
 }
 
 
@@ -40,7 +40,7 @@ bool driver_encoder::writeParam(int paramNo, int subindex, int paramValue)
     sstel<<std::hex<<subindex;
     sstel<<"h ";
     sstel<<std::dec<<paramValue<<"\n";
-	_log_debug("seting param %s", sstel.str().c_str());
+	BOOST_LOG_TRIVIAL(trace) <<"seting param " << sstel.str();
     boost::asio::write(socket, boost::asio::buffer(sstel.str()), boost::asio::transfer_all(), ignored_error);
     //boost::this_thread::sleep( boost::posix_time::millisec(20) );
 
@@ -52,7 +52,7 @@ bool driver_encoder::writeParam(int paramNo, int subindex, int paramValue)
     else if (error)
         throw boost::system::system_error(error); // Some other error.
 
-    _log_debug("recived from m3d %s", std::string(buf.begin(), buf.begin()+len).c_str());
+    BOOST_LOG_TRIVIAL(trace) <<"recived from m3d ", std::string(buf.begin(), buf.begin()+len);
     return true;
 }
 
@@ -69,7 +69,7 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
     sstel<<"h.";
     sstel<<std::hex<<subindex;
     sstel<<"h\n";
-    _log_debug("getting param %s", sstel.str().c_str());
+    BOOST_LOG_TRIVIAL(trace) <<"getting param %s"<< sstel.str().c_str();
     boost::asio::write(socket, boost::asio::buffer(sstel.str()), boost::asio::transfer_all(), ignored_error);
 
 
@@ -86,7 +86,7 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
     std::vector<std::string> strs;
     boost::split(strs,data,boost::is_any_of(" "));
 
-    _log_debug("recived from m3d %s", std::string(buf.begin(), buf.begin()+len).c_str());
+    BOOST_LOG_TRIVIAL(trace) <<"recived from m3d " <<std::string(buf.begin(), buf.begin()+len);
 
     if (strs.size()!=4) return false;
 
@@ -99,7 +99,7 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
     {
         return false;
     }
-    _log_debug("Value: %d", paramValue);
+    BOOST_LOG_TRIVIAL(trace) << "Value: ", paramValue;
 
     return true;
 }
@@ -112,7 +112,7 @@ bool driver_encoder::setPosition (float position, int speed, int relative)
 {
 
 
-		_log_info("Setting new position");
+		BOOST_LOG_TRIVIAL(info) << "Setting new position";
 
         bool isOk =false;
 
@@ -146,6 +146,7 @@ float driver_encoder::getAngle(bool & isOk)
         isOk =false ;
         return -1.0f;
     }
+	isOk=true;
     value = value % encRes;
     float ret = -2*M_PI*value/encRes;
     return ret;
@@ -173,7 +174,7 @@ int driver_encoder::getEncoderRes(bool & isOk)
 }
 bool driver_encoder::setSpeed(int speed)
 {
-    _log_info("seting speed");
+    BOOST_LOG_TRIVIAL(info) <<"seting speed to :" <<speed;
 
     bool isOk =false;
     //vel() mode
@@ -190,4 +191,5 @@ bool driver_encoder::setSpeed(int speed)
 
     writeParam(0x3000,0x1, 49);
     if (!isOk) return false;
+	return true;
 }
