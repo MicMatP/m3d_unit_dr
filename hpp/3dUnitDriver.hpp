@@ -15,6 +15,11 @@
 // Converts radians to degrees.
 #define radiansToDegrees(angleRadians) (angleRadians * 180.0 / M_PI)
 
+struct pointcloud
+{
+	std::vector<glm::vec3> data;
+	std::vector<float> intensity;
+};
 
 typedef std::pair<boost::posix_time::ptime, lms_measurement> laserMeasurment;
 typedef std::pair<boost::posix_time::ptime, float> encoderMeasurment;
@@ -55,17 +60,37 @@ public:
 
 	_3dUnitDriver();
 
-	//sets rotation speed;
+	///sets rotation speed;
 	inline void setSpeed(float v)
 	{
 		newSpeed =v;
 	}
 
-	//sets a calibrating matrix
+	///sets a calibrating matrix
 	inline void setMatrixCalibMatrix(glm::mat4 m)
 	{
 		laserCalibrationMatrix =m;
 	}
+	///request pointcloud
+	inline void requestPointcloud()
+	{
+		collectingPointcloud =true;
+		angleCollection=0;
+		lastAngleCollection=curentAngle;
+	}
+
+	///wait for pointcloud (blocking)
+	inline void waitForPointCloud()
+	{
+		while (_newPointCloud == false)
+		{
+			boost::this_thread::sleep(boost::posix_time::millisec(100));
+		}
+		_newPointCloud=false;
+		return;
+	}
+	/// get pointcloud
+	void getPointCloud(pointcloud &pc);
 private:
 	///callback for laser thread
 
@@ -93,9 +118,20 @@ private:
 	float curentAngle;
 	boost::mutex laserMeasurmentsLock;
 	boost::mutex encMeasurmentLock;
+	boost::mutex pointcloudLock;
+	///actual collecting pointcloud
+	pointcloud collectingPointCloud;
+	///last measured pointcloud
+	pointcloud lastPointCloud;
+
 	glm::mat4 laserCalibrationMatrix;
 	// new requested speed;
 	float newSpeed;
+	
+	float angleCollection;
+	float lastAngleCollection;
+	bool collectingPointcloud;
+	bool _newPointCloud;
 };
 
 

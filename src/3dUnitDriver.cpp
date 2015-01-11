@@ -42,6 +42,8 @@ namespace logging = boost::log;
 		lmsIp ="192.168.0.201";
 		unitIp="192.168.0.150";
 		newSpeed =-1.0f;
+		collectingPointcloud=false;
+		_newPointCloud=false;
 	}
 
 	
@@ -72,11 +74,11 @@ namespace logging = boost::log;
 					encMeasurmentBuffer.push_back(m);
 					if(encMeasurmentBuffer.size()> 10) encMeasurmentBuffer.pop_back();
 				encMeasurmentLock.unlock();
-				boost::this_thread::sleep(boost::posix_time::millisec(10));
+				boost::this_thread::sleep(boost::posix_time::millisec(17));
 
 			}
 			
-			boost::this_thread::sleep(boost::posix_time::millisec(5));
+			boost::this_thread::sleep(boost::posix_time::millisec(3));
 		}
 	}
 
@@ -96,27 +98,39 @@ namespace logging = boost::log;
 				boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
 				
 				
-				boost::this_thread::sleep(boost::posix_time::millisec(10));
-
-			
+				boost::this_thread::sleep(boost::posix_time::millisec(5));
 				profileWithAngle m;
-				m.encoder = curentAngle;
+
+				m.encoder = abs( curentAngle);
 				m.profile =LMS.currentMessage;
+			
 				laserMeasurmentsLock.lock();
 				readyData.push_back(m);
 				laserMeasurmentsLock.unlock();
 				
+				
+
+				
 			}
-			boost::this_thread::sleep(boost::posix_time::millisec(5));
+			boost::this_thread::sleep(boost::posix_time::millisec(2));
 		}
 
 		LMS.disconnet();
 	}
 
+void _3dUnitDriver::getPointCloud(pointcloud &pc)
+{
+	pointcloudLock.lock();
+	pc.data = lastPointCloud.data;
+	pc.intensity = lastPointCloud.intensity;
+
+	pointcloudLock.unlock();
+}
+
 void _3dUnitDriver::combineThread()
 {
-	std::ofstream fileD;
-	fileD.open("debug.asc");
+	//std::ofstream fileD;
+	//fileD.open("debug.asc");
 	while (!_done)
 	{
 		if (readyData.size()< 50)
@@ -152,14 +166,45 @@ void _3dUnitDriver::combineThread()
 					float d = lit->profile.echoes[0].data[i];
 					glm::vec4 in (d, 0.0, 0.0f, 1.0f);
 					glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f), glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
-					glm::mat4 calib = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, 50.0f));
-
+					glm::mat4 calib = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, -50.0f));
 					glm::mat4 cor = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f),glm::vec3(0.0f, 1.0f, 0.0f));
 
 					//glm::mat4 dAffine = glm::matrixCompMult(affineLaser, affine);
 					glm::vec4 out =affine3Dunit* cor* calib* affineLaser * in;
-					fileD<<out.x <<"\t"<<out.y <<"\t"<<out.z <<"\n";
+					collectingPointCloud.data.push_back(glm::vec3(out.x, out.y,out.z));		
+					if (lit->profile.rssis.size()>0)collectingPointCloud.intensity.push_back( lit->profile.rssis[0].data[i]);
 				}
+					
+				float dAngle = abs(lit->encoder-lastAngleCollection);
+				
+				if (dAngle > 1*M_PI || (dAngle!=dAngle)) dAngle=0;
+				//BOOST_LOG_TRIVIAL(info)  <<lastAngleCollection <<"\t"<<curentAngle<<"\t"<<dAngle<<"\t"<<angleCollection<< "\n";
+				
+				angleCollection=angleCollection+dAngle;
+
+
+				angleCollection = angleCollection+dAngle;
+				BOOST_LOG_TRIVIAL(trace)<<angleCollection;
+				if (abs(angleCollection) > 2.2* M_PI)
+				{
+					BOOST_LOG_TRIVIAL(info) <<"get angle :"<<angleCollection;
+					angleCollection = 0.0f;
+					
+					pointcloudLock.lock();
+					
+					{
+						lastPointCloud.data = collectingPointCloud.data;
+						lastPointCloud.intensity = collectingPointCloud.intensity;
+						collectingPointCloud.data.clear();
+						collectingPointCloud.intensity.clear();
+					}
+					
+					pointcloudLock.unlock();
+					_newPointCloud = true;
+				}
+
+				lastAngleCollection =  lit->encoder;
+
 				
 				
 			}
