@@ -197,12 +197,12 @@ float _3dUnitDriver::getNearestAngle(boost::posix_time::ptime timeStamp)
 	///@todo vector is nearly sorted - maybe optimalisation!!
 	///@todo maybe better is map for measurments;
 	float angle = -1;
-	__int64 maxTimeD =10;//msec
-	__int64 timeAcc =2; //msec
-	__int64 minimal_dTime =maxTimeD;
+    long long int maxTimeD =10;//msec
+    long long int timeAcc =2; //msec
+    long long int minimal_dTime =maxTimeD;
 	for (std::vector<encoderMeasurment>::iterator it = encMeasurmentBuffer.begin(); it!= encMeasurmentBuffer.end(); it++)
 	{
-		__int64 timeD = (it->first-timeStamp).total_milliseconds();
+        long long int timeD = (it->first-timeStamp).total_milliseconds();
 		if (abs(timeD) < minimal_dTime)
 		{
 			angle = it->second;
