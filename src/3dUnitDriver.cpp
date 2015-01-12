@@ -32,8 +32,12 @@ namespace logging = boost::log;
 
 	void _3dUnitDriver::deinitialize()
 	{
-		_done = false;
+		_done = true;
+		BOOST_LOG_TRIVIAL(info)<<"waiting for joining threads";
 		lmsThread.join();
+		encThread.join();
+		collectorThread.join();
+
 	}
 
 	_3dUnitDriver::_3dUnitDriver()
@@ -49,7 +53,7 @@ namespace logging = boost::log;
 	
 	void _3dUnitDriver::encoderWorker()
 	{
-		BOOST_LOG_TRIVIAL(debug)<<"enc thread started";
+		BOOST_LOG_TRIVIAL(info)<<"enc thread started";
 		ENC.connect_to_m3d(unitIp);
 		ENC.setSpeed(30);
 		while (!_done)
@@ -74,12 +78,15 @@ namespace logging = boost::log;
 					encMeasurmentBuffer.push_back(m);
 					if(encMeasurmentBuffer.size()> 10) encMeasurmentBuffer.pop_back();
 				encMeasurmentLock.unlock();
-				boost::this_thread::sleep(boost::posix_time::millisec(17));
+				boost::this_thread::sleep(boost::posix_time::millisec(15));
 
 			}
 			
 			boost::this_thread::sleep(boost::posix_time::millisec(3));
 		}
+		ENC.setSpeed(0);
+		boost::this_thread::sleep(boost::posix_time::millisec(300));
+		BOOST_LOG_TRIVIAL(info)<<"enc thread ended";
 	}
 
 	void _3dUnitDriver::laserThreadWorker()
@@ -98,24 +105,25 @@ namespace logging = boost::log;
 				boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
 				
 				
-				boost::this_thread::sleep(boost::posix_time::millisec(5));
+				
 				profileWithAngle m;
-
-				m.encoder = abs( curentAngle);
+				m.encoder = abs(curentAngle);
 				m.profile =LMS.currentMessage;
 			
 				laserMeasurmentsLock.lock();
 				readyData.push_back(m);
 				laserMeasurmentsLock.unlock();
+				boost::this_thread::sleep(boost::posix_time::millisec(10));
 				
-				
-
 				
 			}
-			boost::this_thread::sleep(boost::posix_time::millisec(2));
+	
+			
+		
+			
 		}
-
 		LMS.disconnet();
+		BOOST_LOG_TRIVIAL(info)<<"lms thread ended";
 	}
 
 void _3dUnitDriver::getPointCloud(pointcloud &pc)
@@ -135,7 +143,7 @@ void _3dUnitDriver::combineThread()
 	{
 		if (readyData.size()< 50)
 		{
-			boost::this_thread::sleep(boost::posix_time::millisec(30));
+			boost::this_thread::sleep(boost::posix_time::millisec(100));
 			continue;
 		}
 	
@@ -145,7 +153,6 @@ void _3dUnitDriver::combineThread()
 		laserMeasurmentsLock.lock();
 		copyProfiles = readyData;
 		readyData.clear();
-		
 		laserMeasurmentsLock.unlock();
 		
 		for (std::vector<profileWithAngle>::iterator lit = copyProfiles.begin(); lit != copyProfiles.end(); lit++)
@@ -184,7 +191,7 @@ void _3dUnitDriver::combineThread()
 
 
 				angleCollection = angleCollection+dAngle;
-				BOOST_LOG_TRIVIAL(trace)<<angleCollection;
+				//BOOST_LOG_TRIVIAL(trace)<<angleCollection;
 				if (abs(angleCollection) > 2.2* M_PI)
 				{
 					BOOST_LOG_TRIVIAL(info) <<"get angle :"<<angleCollection;
@@ -201,18 +208,17 @@ void _3dUnitDriver::combineThread()
 					
 					pointcloudLock.unlock();
 					_newPointCloud = true;
+					if(!scanCallback.empty()) scanCallback();
 				}
 
 				lastAngleCollection =  lit->encoder;
 
 				
-				
 			}
 		}
-
-		
-		
 	}
+	BOOST_LOG_TRIVIAL(info)<<"combine thread ended";
+		
 }
 void applyPriority(boost::thread* m_pThread,  threadPriority priority)
 {

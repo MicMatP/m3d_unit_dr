@@ -1,10 +1,13 @@
 #ifndef _UNIT_DRIVER_HPP
 #define _UNIT_DRIVER_HPP
-
+#include "m3d_driver_lib_export.h"
 #include <boost/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/mutex.hpp>
 #include <glm/glm.hpp>
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include "lms_mini_lib.hpp"
 
 #include "encoder_driver.hpp"
@@ -15,7 +18,7 @@
 // Converts radians to degrees.
 #define radiansToDegrees(angleRadians) (angleRadians * 180.0 / M_PI)
 
-struct pointcloud
+struct  M3D_DRIVER_LIB_EXPORT pointcloud
 {
 	std::vector<glm::vec3> data;
 	std::vector<float> intensity;
@@ -23,8 +26,9 @@ struct pointcloud
 
 typedef std::pair<boost::posix_time::ptime, lms_measurement> laserMeasurment;
 typedef std::pair<boost::posix_time::ptime, float> encoderMeasurment;
+typedef boost::function<void()> callback;
 
-struct unitMeasurment
+struct M3D_DRIVER_LIB_EXPORT unitMeasurment
 {
 	std::vector<glm::vec3> points;
 	std::vector<float> intensities;
@@ -32,13 +36,13 @@ struct unitMeasurment
 	boost::posix_time::ptime timestamp;
 };
 
-struct profileWithAngle
+struct M3D_DRIVER_LIB_EXPORT profileWithAngle
 {
 	lms_measurement profile;
 	float encoder;
 };
 
-struct config
+struct M3D_DRIVER_LIB_EXPORT config
 {
 	std::string rotLaserIp;
 	std::string _3dunitIp;
@@ -50,7 +54,7 @@ enum threadPriority {REALTIME, HIGH, ABOVE_NORMAL,NORMAL,BELOW_NORMAL,IDLE};
 void extern applyPriority(boost::thread* m_pThread,  threadPriority priority);
 
 
-class _3dUnitDriver
+class M3D_DRIVER_LIB_EXPORT _3dUnitDriver
 {
 public:
 	/// spawn everything - starts thread for lms, 3dunit, and synchronizer
@@ -59,6 +63,19 @@ public:
 	void deinitialize();
 
 	_3dUnitDriver();
+	~_3dUnitDriver()
+	{
+		deinitialize();
+	}
+	///registers a callback called when new pointcloud is recived;
+	inline void setCallbackPointCloud(callback cb) {
+        scanCallback = cb;
+    }
+	///registers a callback called when new pointcloud is recived;
+	inline void setCallbackProfile(callback cb) {
+         profileCallback = cb;
+    }
+
 
 	///sets rotation speed;
 	inline void setSpeed(float v)
@@ -89,7 +106,13 @@ public:
 		_newPointCloud=false;
 		return;
 	}
-	/// get pointcloud
+	///check is pointcloud is ready (non-blocking)
+	inline void isPointCloudDone(bool &isDone)
+	{
+		isDone = _newPointCloud;
+	}
+
+	/// get pointcloud (non-blocking)
 	void getPointCloud(pointcloud &pc);
 private:
 	///callback for laser thread
@@ -132,6 +155,12 @@ private:
 	float lastAngleCollection;
 	bool collectingPointcloud;
 	bool _newPointCloud;
+	///an asynchronuous callback on scan made;
+	callback scanCallback;
+	///an asynchronuous callback on recived profile;
+	callback profileCallback;
+
+
 };
 
 

@@ -40,7 +40,7 @@ bool driver_encoder::writeParam(int paramNo, int subindex, int paramValue)
     sstel<<std::hex<<subindex;
     sstel<<"h ";
     sstel<<std::dec<<paramValue<<"\n";
-	BOOST_LOG_TRIVIAL(trace) <<"seting param " << sstel.str();
+	//BOOST_LOG_TRIVIAL(trace) <<"seting param " << sstel.str();
     boost::asio::write(socket, boost::asio::buffer(sstel.str()), boost::asio::transfer_all(), ignored_error);
     //boost::this_thread::sleep( boost::posix_time::millisec(20) );
 
@@ -52,7 +52,7 @@ bool driver_encoder::writeParam(int paramNo, int subindex, int paramValue)
     else if (error)
         throw boost::system::system_error(error); // Some other error.
 
-    BOOST_LOG_TRIVIAL(trace) <<"recived from m3d ", std::string(buf.begin(), buf.begin()+len);
+    //BOOST_LOG_TRIVIAL(trace) <<"recived from m3d ", std::string(buf.begin(), buf.begin()+len);
     return true;
 }
 
@@ -69,7 +69,7 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
     sstel<<"h.";
     sstel<<std::hex<<subindex;
     sstel<<"h\n";
-    BOOST_LOG_TRIVIAL(trace) <<"getting param %s"<< sstel.str().c_str();
+    //BOOST_LOG_TRIVIAL(trace) <<"getting param %s"<< sstel.str().c_str();
     boost::asio::write(socket, boost::asio::buffer(sstel.str()), boost::asio::transfer_all(), ignored_error);
 
 
@@ -86,7 +86,7 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
     std::vector<std::string> strs;
     boost::split(strs,data,boost::is_any_of(" "));
 
-    BOOST_LOG_TRIVIAL(trace) <<"recived from m3d " <<std::string(buf.begin(), buf.begin()+len);
+    //BOOST_LOG_TRIVIAL(trace) <<"recived from m3d " <<std::string(buf.begin(), buf.begin()+len);
 
     if (strs.size()!=4) return false;
 
@@ -99,7 +99,7 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
     {
         return false;
     }
-    BOOST_LOG_TRIVIAL(trace) << "Value: ", paramValue;
+    //BOOST_LOG_TRIVIAL(trace) << "Value: ", paramValue;
 
     return true;
 }

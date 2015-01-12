@@ -4,11 +4,12 @@
 #include <iostream>
 #include <vector>
 #include <boost/algorithm/string.hpp>
+#include "m3d_driver_lib_export.h"
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 using boost::asio::ip::tcp;
 
-struct lms_channel
+struct M3D_DRIVER_LIB_EXPORT lms_channel
 {
     std::string contents;
     float scallingFactor;
@@ -19,7 +20,7 @@ struct lms_channel
     std::vector<int>data;
 };
 
-struct lms_measurement
+struct M3D_DRIVER_LIB_EXPORT lms_measurement
 {
     std::string _typefCommand;
     std::string _command;
@@ -44,7 +45,7 @@ struct lms_measurement
 
 };
 
-class lms_socket
+class M3D_DRIVER_LIB_EXPORT lms_socket
 {
 public:
 
@@ -75,7 +76,7 @@ public:
     void readData(bool &isMeasurment);
 
 private:
-    bool processSubMsg(std::string msg);
+    bool processSubMsg(std::string & msg);
     bool _debug;
     int searchForPhase(std::string stringPh,  std::vector<std::string> & data , int beg=0);
 
@@ -85,7 +86,7 @@ private:
 
     bool procesChannel(lms_channel &ch, std::vector<std::string> & data, std::string channelName);
 
-
+	size_t lastTelegramSize;
  std::string incommingData;
  boost::asio::io_service io_service;
  tcp::socket socket;

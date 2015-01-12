@@ -1,6 +1,6 @@
 #ifndef _ENCODER_DRIVER_HPP
 #define _ENCODER_DRIVER_HPP
-
+#include "m3d_driver_lib_export.h"
 #include <iostream>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
@@ -16,7 +16,7 @@ using namespace boost::system;
 //using boost::optional;
 
 
-class driver_encoder
+class M3D_DRIVER_LIB_EXPORT driver_encoder
 {
 
     enum mode

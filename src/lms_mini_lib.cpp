@@ -57,32 +57,25 @@ using boost::asio::ip::tcp;
 
     void lms_socket::readData(bool &isMeasurment)
     {
-        boost::array<char, 4000> buf;
-        boost::system::error_code error;
-        int len = socket.read_some(boost::asio::buffer(buf), error);
-        if (error == boost::asio::error::eof)
-           return; // Connection closed cleanly by peer.
-        else if (error)
-           throw boost::system::system_error(error); // Some other error.
+		//check if we are out of sync
+		
 
-
-        incommingData.append(buf.begin(), buf.begin()+len);
+		boost::asio::streambuf b;
+		boost::asio::read_until(socket, b, char(0x03));
+		
+		std::string incommingData( (std::istreambuf_iterator<char>(&b)), std::istreambuf_iterator<char>() );
         size_t begin = incommingData.find_last_of(char(0x02));
         size_t end = incommingData.find_last_of(char(0x03));
-        if(_debug)std::cout <<incommingData.size()<<'\n';
+
         if (begin!= std::string::npos && end != std::string::npos && begin < end)
         {
 
             //std::cout <<incommingData.substr(begin+1, end-begin-1)<<"\n";
             isMeasurment = processSubMsg(incommingData.substr(begin+1, end-begin-1));
-
+			if (isMeasurment) lastTelegramSize = end-begin-1;
             incommingData.clear();
         }
-        if (incommingData.size()>10000)
-        {
-            std::cerr<<"overflow warning \n";
-            incommingData.clear();
-        }
+        
     }
 
     void lms_socket::disconnet()
@@ -100,7 +93,7 @@ using boost::asio::ip::tcp;
         }
     }
 
-    bool lms_socket::processSubMsg(std::string msg)
+    bool lms_socket::processSubMsg(std::string &msg)
     {
 
         std::vector<std::string> data;
