@@ -7,8 +7,12 @@
 
 _3dUnitDriver* d;
 
-int i =0;
+
 #ifndef sync_read
+class example
+{
+public:
+	example():i(0){};
 	void asyncPointcloud()
 	{
 		std::cout<<"Got pointcloud !\n";
@@ -28,11 +32,15 @@ int i =0;
 			}
 		pcfile.close();
 	}
+private: 
+	int i;
+};
 #endif
 
 int main(int argc, char **argv)
 {
 
+	
 
 
 //    ros::init(argc, argv, "lms_mini_driver");
@@ -47,7 +55,8 @@ int main(int argc, char **argv)
 	d->requestPointcloud();
 	int i=0;
 #ifndef sync_read	
-	d->setCallbackPointCloud(asyncPointcloud);
+	example w;
+	d->setCallbackPointCloud(boost::bind(&example::asyncPointcloud, &w));
 #endif;
 
 	
