@@ -15,7 +15,7 @@ ENDIF()
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 
-find_package(Boost COMPONENTS system thread filesystem date_time log log_setup REQUIRED)
+find_package(Boost COMPONENTS system thread filesystem date_time REQUIRED)
 
 
 SET(_FILES_m3d src/lms_mini_lib.cpp src/3dUnitDriver.cpp src/encoder_driver.cpp )
@@ -41,7 +41,7 @@ else()
 endif()
 #library, shared for m3d unit
 	add_library(m3d_driver_lib SHARED ${_FILES_m3d})
-	GENERATE_EXPORT_HEADER(m3d_driver_lib)
+	#GENERATE_EXPORT_HEADER(m3d_driver_lib)
 
 	add_executable(3d_unit_basicTest src/driver.cpp)
 	target_link_libraries(3d_unit_basicTest ${Boost_LIBRARIES} ${Boost_LIBRARIES} m3d_driver_lib)

@@ -1,27 +1,22 @@
 #include "3dUnitDriver.hpp"
 #include "encoder_driver.hpp"
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
 #include <fstream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <boost/log/trivial.hpp>
 #define M_PI 3.14159265358979323846
+#include <logger.hpp>
 
-namespace logging = boost::log;
+
+SET_DEBUGLVL(_PRINTOUT_DEBUG);
 	/// spawn everything - starts thread for lms, 3dunit, and synchronizer
 	void _3dUnitDriver::initialize()
 	{
 		newSpeed =-1.0f;
-		logging::core::get()->set_filter
-		(
-			logging::trivial::severity >= logging::trivial::info
-		);
-
+		
 		_done = false;
-		BOOST_LOG_TRIVIAL(debug) << "initializing _3dUnitDriver";
+		LOG_INFO("initializing _3dUnitDriver");
 		lmsThread  =  boost::thread(boost::bind(&_3dUnitDriver::laserThreadWorker, this));
 		encThread  =  boost::thread(boost::bind(&_3dUnitDriver::encoderWorker, this));
 		collectorThread =  boost::thread(boost::bind(&_3dUnitDriver::combineThread, this));
@@ -33,7 +28,7 @@ namespace logging = boost::log;
 	void _3dUnitDriver::deinitialize()
 	{
 		_done = true;
-		BOOST_LOG_TRIVIAL(info)<<"waiting for joining threads";
+		LOG_INFO("waiting for joining threads");
 		lmsThread.join();
 		encThread.join();
 		collectorThread.join();
@@ -53,14 +48,14 @@ namespace logging = boost::log;
 	
 	void _3dUnitDriver::encoderWorker()
 	{
-		BOOST_LOG_TRIVIAL(info)<<"enc thread started";
+		LOG_INFO("enc thread started");
 		ENC.connect_to_m3d(unitIp);
 		ENC.setSpeed(30);
 		while (!_done)
 		{
 			if (newSpeed !=-1.0f)
 			{
-				if (ENC.setSpeed(1*newSpeed))	newSpeed =-1;
+				if (ENC.setSpeed((int)newSpeed))	newSpeed =-1;
 			}
 			bool isAngle =false;
 			double angle = ENC.getAngle(isAngle);
@@ -71,8 +66,8 @@ namespace logging = boost::log;
 				boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
 				
 				m.first = now;
-				m.second =angle;
-				BOOST_LOG_TRIVIAL(debug) <<"angle:"<< m.second<<"\n";
+				m.second =static_cast<float>(angle);
+				LOG_DEBUG("angle:"<< m.second);
 				encMeasurmentLock.lock();
 				curentAngle = m.second;
 					encMeasurmentBuffer.push_back(m);
@@ -86,12 +81,12 @@ namespace logging = boost::log;
 		}
 		ENC.setSpeed(0);
 		boost::this_thread::sleep(boost::posix_time::millisec(300));
-		BOOST_LOG_TRIVIAL(info)<<"enc thread ended";
+		LOG_INFO("enc thread ended");
 	}
 
 	void _3dUnitDriver::laserThreadWorker()
 	{
-		BOOST_LOG_TRIVIAL(debug)<<"lms thread started";
+		LOG_INFO("lms thread started");
 	    
 		LMS.connectToLaser(lmsIp);
 		LMS.requestContinousScan();
@@ -119,11 +114,9 @@ namespace logging = boost::log;
 			}
 	
 			
-		
-			
 		}
 		LMS.disconnet();
-		BOOST_LOG_TRIVIAL(info)<<"lms thread ended";
+		LOG_INFO("lms thread ended");
 	}
 
 void _3dUnitDriver::getPointCloud(pointcloud &pc)
@@ -169,7 +162,7 @@ void _3dUnitDriver::combineThread()
 				for (int i =0; i < lit->profile.echoes[0].data.size(); i++)
 				{
 
-					float lasAng = 1.0*i *(lit->profile.echoes[0].angStepWidth)  -135.0f;
+					float lasAng = float(1.0*i *(lit->profile.echoes[0].angStepWidth)  -135.0f);
 					float d = lit->profile.echoes[0].data[i];
 					glm::vec4 in (d, 0.0, 0.0f, 1.0f);
 					glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f), glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
@@ -194,7 +187,7 @@ void _3dUnitDriver::combineThread()
 				//BOOST_LOG_TRIVIAL(trace)<<angleCollection;
 				if (abs(angleCollection) > 2.2* M_PI)
 				{
-					BOOST_LOG_TRIVIAL(info) <<"get angle :"<<angleCollection;
+					LOG_DEBUG("get angle :"<<angleCollection);
 					angleCollection = 0.0f;
 					
 					pointcloudLock.lock();
@@ -217,7 +210,7 @@ void _3dUnitDriver::combineThread()
 			}
 		}
 	}
-	BOOST_LOG_TRIVIAL(info)<<"combine thread ended";
+	LOG_INFO("combine thread ended");
 		
 }
 void applyPriority(boost::thread* m_pThread,  threadPriority priority)

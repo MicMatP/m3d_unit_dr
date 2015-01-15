@@ -37,7 +37,7 @@ public:
         bool t;
         float res=  getAngle(t);
         if (t) return res;
-        if (!t) return -1.0f;
+         return -1.0f;
     }
 
     float getAngle(bool & isOk);

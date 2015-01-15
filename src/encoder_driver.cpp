@@ -1,12 +1,11 @@
 #include "encoder_driver.hpp"
-#include <boost/log/trivial.hpp>
 #include <sstream>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/algorithm/string.hpp>
 #define M_PI 3.14159265358979323846
-
+#include "logger.hpp"
 void driver_encoder::connect_to_m3d(std::string IP)
 {
 	host = IP;
@@ -23,7 +22,7 @@ void driver_encoder::connect_to_m3d(std::string IP)
         if (error) throw boost::system::system_error(error);
    bool t;
         getEncoderRes(t);
-		BOOST_LOG_TRIVIAL(info) <<"m3d encoder res:"<< encRes;
+		LOG_INFO("m3d encoder res:"<< encRes);
 }
 
 
@@ -112,7 +111,7 @@ bool driver_encoder::setPosition (float position, int speed, int relative)
 {
 
 
-		BOOST_LOG_TRIVIAL(info) << "Setting new position";
+		LOG_INFO("Setting new position");
 
         bool isOk =false;
 
@@ -123,8 +122,8 @@ bool driver_encoder::setPosition (float position, int speed, int relative)
         isOk = writeParam(0x3000,0x10, speed);
         if (!isOk) return false;
         //position
-        position=(position/(2*M_PI))*encRes;
-        writeParam(0x3000,0x11, position);
+        position=static_cast<float>((position/(2*M_PI))*encRes);
+        writeParam(0x3000,0x11, (int)position);
         if (!isOk) return false;
         //stop!
         writeParam(0x3000,0x1, 0);
@@ -171,10 +170,11 @@ int driver_encoder::getEncoderRes(bool & isOk)
         return -1.0f;
     }
     encRes = 4*value;
+	return encRes;
 }
 bool driver_encoder::setSpeed(int speed)
 {
-    BOOST_LOG_TRIVIAL(info) <<"seting speed to :" <<speed;
+    LOG_INFO("seting speed to :" <<speed);
 
     bool isOk =false;
     //vel() mode
