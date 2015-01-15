@@ -76,7 +76,7 @@ public:
     void readData(bool &isMeasurment);
 
 private:
-    bool processSubMsg(std::string & msg);
+    bool processSubMsg(std::string& msg);
     bool _debug;
     int searchForPhase(std::string stringPh,  std::vector<std::string> & data , int beg=0);
 

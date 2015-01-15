@@ -72,9 +72,9 @@ target_link_libraries(simpleWrtier ${Boost_LIBRARIES} ${Boost_LIBRARIES} m3d_dri
 #########################################################
 if(OPENGL_FOUND AND GLUT_FOUND)
 	add_executable(simpleGL examples/simpleGL.cpp)
-	target_link_libraries(simpleGL  m3d_driver_lib ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} )
+	target_link_libraries(simpleGL  m3d_driver_lib ${OPENGL_LIBRARIES} ${Boost_LIBRARIES} ${GLUT_LIBRARY} )
 
 endif()
 
-file(COPY ${CMAKE_SOURCE_DIR}/sampleConfig/3dunitCfg.xml  DESTINATION ${MAKE_BINARY_DIR}/3dunitCfg.xml)
+file(COPY ${CMAKE_SOURCE_DIR}/sampleConfig/3dUnitCfg.xml  DESTINATION ${CMAKE_BINARY_DIR})
 

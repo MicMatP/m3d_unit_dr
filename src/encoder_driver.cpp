@@ -68,8 +68,9 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
     sstel<<"h.";
     sstel<<std::hex<<subindex;
     sstel<<"h\n";
-    //BOOST_LOG_TRIVIAL(trace) <<"getting param %s"<< sstel.str().c_str();
+    //std::cout <<"getting param %s"<< sstel.str().c_str();
     boost::asio::write(socket, boost::asio::buffer(sstel.str()), boost::asio::transfer_all(), ignored_error);
+    boost::this_thread::sleep(boost::posix_time::millisec(15));
 
 
     int len = socket.read_some(boost::asio::buffer(buf), error);
@@ -85,7 +86,7 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
     std::vector<std::string> strs;
     boost::split(strs,data,boost::is_any_of(" "));
 
-    //BOOST_LOG_TRIVIAL(trace) <<"recived from m3d " <<std::string(buf.begin(), buf.begin()+len);
+    //std::cout<<"recived from m3d " <<std::string(buf.begin(), buf.begin()+len);
 
     if (strs.size()!=4) return false;
 
@@ -96,6 +97,7 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
     }
     catch(boost::bad_lexical_cast e)
     {
+         std::cout<<"recived from m3d [BAD LEXICAL CAST] " <<std::string(buf.begin(), buf.begin()+len);
         return false;
     }
     //BOOST_LOG_TRIVIAL(trace) << "Value: ", paramValue;

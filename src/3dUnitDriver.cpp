@@ -111,7 +111,6 @@ void _3dUnitDriver::encoderWorker()
 			encMeasurmentBuffer.push_back(m);
 			if(encMeasurmentBuffer.size()> 10) encMeasurmentBuffer.pop_back();
 			encMeasurmentLock.unlock();
-			boost::this_thread::sleep(boost::posix_time::millisec(15));
 
 		}
 
@@ -138,15 +137,14 @@ void _3dUnitDriver::laserThreadWorker()
 			boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
 
 
-
-			profileWithAngle m;
-			m.encoder = abs(curentAngle);
+            profileWithAngle m;
+            m.encoder = fabs(curentAngle);
 			m.profile =LMS.currentMessage;
 
 			laserMeasurmentsLock.lock();
 			readyData.push_back(m);
 			laserMeasurmentsLock.unlock();
-			boost::this_thread::sleep(boost::posix_time::millisec(10));
+            boost::this_thread::sleep(boost::posix_time::millisec(10));
 		}
 	}
 	LMS.disconnet();
@@ -208,7 +206,7 @@ void _3dUnitDriver::combineThread()
 					if (lit->profile.rssis.size()>0)collectingPointCloud.intensity.push_back( lit->profile.rssis[0].data[i]);
 				}
 
-				float dAngle = abs(lit->encoder-lastAngleCollection);
+                float dAngle = fabs(lit->encoder-lastAngleCollection);
 
 				if (dAngle > 1*M_PI || (dAngle!=dAngle)) dAngle=0;
 
@@ -216,7 +214,7 @@ void _3dUnitDriver::combineThread()
 
 
 				angleCollection = angleCollection+dAngle;
-				if (abs(angleCollection) > 2.2* M_PI)
+                if (fabs(angleCollection) > 2.2* M_PI)
 				{
 					LOG_DEBUG("get angle :"<<angleCollection);
 					angleCollection = 0.0f;

@@ -1,5 +1,5 @@
 
-#include <GL/glut.h>	   // The GL Utility Toolkit (GLUT) Header
+#include <GL/glut.h>
 #include <boost/thread/mutex.hpp>
 #include <3dUnitDriver.hpp>
 #define KEY_ESCAPE 27

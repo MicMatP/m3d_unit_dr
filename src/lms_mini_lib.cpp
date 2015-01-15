@@ -71,7 +71,8 @@ using boost::asio::ip::tcp;
         {
 
             //std::cout <<incommingData.substr(begin+1, end-begin-1)<<"\n";
-            isMeasurment = processSubMsg(incommingData.substr(begin+1, end-begin-1));
+            std::string subMsg =incommingData.substr(begin+1, end-begin-1);
+            isMeasurment = processSubMsg(subMsg);
 			if (isMeasurment) lastTelegramSize = end-begin-1;
             incommingData.clear();
         }
