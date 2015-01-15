@@ -31,10 +31,10 @@ int vPortAct =0;
 float scale = 1.0;
 
 float pointSize =4;
-pointcloud pc;
+m3d::pointcloud pc;
 boost::mutex pcMutex;
 
-_3dUnitDriver driver;
+m3d::_3dUnitDriver* driver;
 float _3dUnitSpeed =20;
 
 
@@ -144,7 +144,7 @@ void pointcloudCallback()
 	//we locks data to avoid multiple access.
 	pcMutex.lock();
 	// we read pointcloud
-	driver.getPointCloud(pc);
+	driver->getPointCloud(pc);
 	// we unlock data
 	pcMutex.unlock();
 }
@@ -153,16 +153,18 @@ void keyboard ( unsigned char key, int mousePositionX, int mousePositionY )
 { 
   switch ( key ) 
   {
-    case KEY_ESCAPE:        
+    case KEY_ESCAPE: 
+	  driver->deinitialize();
+	  delete driver;
       exit ( 0 );   
       break;    
 	case 'a':        
 		_3dUnitSpeed += 2;
-		driver.setSpeed(_3dUnitSpeed);
+		driver->setSpeed(_3dUnitSpeed);
       break;    
 	case 'z':        
 		_3dUnitSpeed -= 2;
-		driver.setSpeed(_3dUnitSpeed);
+		driver->setSpeed(_3dUnitSpeed);
       break;  
 	 case 's':        
 		pointSize += 0.2;
@@ -200,18 +202,25 @@ int main(int argc, char **argv)
 	}
 
 	//// m3d stuff
+
+	//
+	m3d::_3dUnitConfig cfg;
+	cfg.readConfigFromXML("3dUnitCfg.xml");
+	driver = new m3d::_3dUnitDriver(cfg);
 	// initialization of Mandala 3d unit
-	driver.initialize();
+	driver->initialize();
 	// rotation speed
-	driver.setSpeed(_3dUnitSpeed);
+	driver->setSpeed(_3dUnitSpeed);
 	// subscribe pointcloud
-	driver.requestPointcloud();
+	driver->requestPointcloud();
 	//register method. This method is called from internal driver thread.
 	//That means you have to provide way to synchronize data with your application
 	
-	driver.setCallbackPointCloud(pointcloudCallback);
+	driver->setCallbackPointCloud(pointcloudCallback);
 
 
-	glutMainLoop();							
+	glutMainLoop();	
+	driver->deinitialize();
+	delete driver;
 	return 0;
 }

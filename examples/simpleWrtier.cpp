@@ -5,7 +5,7 @@
 //#define sync_read
 #define async_read
 
-_3dUnitDriver* d;
+m3d::_3dUnitDriver* d;
 
 
 #ifndef sync_read
@@ -17,7 +17,7 @@ public:
 	{
 		std::cout<<"Got pointcloud !\n";
 		std::ofstream pcfile;
-		pointcloud pc;
+		m3d::pointcloud pc;
 		d->getPointCloud(pc);
 		char str[100];
 		std::sprintf(str, "scan%d.asc", i++);
@@ -48,8 +48,9 @@ int main(int argc, char **argv)
 //    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("laserScan",1);
 
     std::string ip = "192.168.0.201";
-
-	d= (new _3dUnitDriver ());
+	m3d::_3dUnitConfig cfg;
+	cfg.readConfigFromXML("3dunitCfg.xml");
+	d= (new m3d::_3dUnitDriver (cfg));
 	d->initialize();
 	d->setSpeed(8);
 	d->requestPointcloud();

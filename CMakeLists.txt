@@ -76,4 +76,5 @@ if(OPENGL_FOUND AND GLUT_FOUND)
 
 endif()
 
+file(COPY ${CMAKE_SOURCE_DIR}/sampleConfig/3dunitCfg.xml  DESTINATION ${MAKE_BINARY_DIR}/3dunitCfg.xml)
 
