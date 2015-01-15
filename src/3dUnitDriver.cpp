@@ -9,7 +9,7 @@
 #include <logger.hpp>
 
 
-SET_DEBUGLVL(_PRINTOUT_DEBUG);
+SET_DEBUGLVL(_PRINTOUT_INFO);
 	/// spawn everything - starts thread for lms, 3dunit, and synchronizer
 	void _3dUnitDriver::initialize()
 	{
