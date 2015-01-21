@@ -34,11 +34,11 @@ if (M3D_BUILD_TOOL_MANUAL_CALIBRATION)
 	# Find the QtWidgets library
 	find_package(Qt5Widgets)
 	find_package(Qt5OpenGL)
-	find_package(PCL 1.7 REQUIRED)
+#	find_package(PCL 1.7 REQUIRED)
 
-	include_directories(${PCL_INCLUDE_DIRS})
-	link_directories(${PCL_LIBRARY_DIRS})
-	add_definitions(${PCL_DEFINITIONS})
+#	include_directories(${PCL_INCLUDE_DIRS})
+#	link_directories(${PCL_LIBRARY_DIRS})
+#	add_definitions(${PCL_DEFINITIONS})
 
 	set(UI_FILES
 	    mainwindow.ui
@@ -53,7 +53,7 @@ if (M3D_BUILD_TOOL_MANUAL_CALIBRATION)
 	# Use the compile definitions defined in the Qt 5 Widgets module
 	add_definitions(${Qt5Widgets_DEFINITIONS})
 
-	# Add compiler flags for building executables (-fPIE)
+	# Add compiler flags for building executables (-fPIE)Fpcl
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 
