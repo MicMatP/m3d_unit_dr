@@ -40,6 +40,7 @@ namespace m3d
 		std::vector<float> intensity;
 	};
 
+
 	typedef std::pair<boost::posix_time::ptime, lms_measurement> laserMeasurment;
 	typedef std::pair<boost::posix_time::ptime, float> encoderMeasurment;
 	typedef boost::function<void()> callback;
@@ -56,6 +57,12 @@ namespace m3d
 	{
 		lms_measurement profile;
 		float encoder;
+	};
+
+	struct  M3D_DRIVER_LIB_EXPORT rawPointcloud
+	{
+		std::vector<lms_measurement> ranges;
+		std::vector<float> angles;
 	};
 
 	struct M3D_DRIVER_LIB_EXPORT config
@@ -130,6 +137,7 @@ namespace m3d
 
 		/// get pointcloud (non-blocking)
 		void getPointCloud(pointcloud &pc);
+		void getRawPointCloud(rawPointcloud &pc);
 	private:
 		
 
@@ -172,8 +180,13 @@ namespace m3d
 		boost::mutex pointcloudLock;
 		///actual collecting pointcloud
 		pointcloud collectingPointCloud;
+		///actual collecting  raw pointcloud
+		rawPointcloud collectingRawpointcloud;
 		///last measured pointcloud
 		pointcloud lastPointCloud;
+		///last raw pointcloud
+		rawPointcloud lastRawPointCloud;
+
 
 		glm::mat4 laserCalibrationMatrix;
 		// new requested speed;

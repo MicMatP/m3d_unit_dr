@@ -70,7 +70,7 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
     sstel<<"h\n";
     //std::cout <<"getting param %s"<< sstel.str().c_str();
     boost::asio::write(socket, boost::asio::buffer(sstel.str()), boost::asio::transfer_all(), ignored_error);
-    boost::this_thread::sleep(boost::posix_time::millisec(15));
+    boost::this_thread::sleep(boost::posix_time::millisec(5));
 
 
     int len = socket.read_some(boost::asio::buffer(buf), error);

@@ -2,9 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT(MANDALA_3dUnit)
 #iF YOU DOES NOT HAVE LIBRARIES IN PATH, YOU CAN EASILY DEFINE ALL HERE
-SET(BOOST_ROOT H:/Libs/boost_1_57_0vs2012x64)
-SET(BOOST_LIBRARYDIR H:/Libs/boost_1_57_0vs2012x64/lib64-msvc-10.0)
-
+#SET(BOOST_ROOT H:/Libs/boost_1_57_0vs2012x64)
+#SET(BOOST_LIBRARYDIR H:/Libs/boost_1_57_0vs2012x64/lib64-msvc-10.0)
 
 
 SET(PROJECT_NAME MANDALA_3dUnit)
@@ -56,6 +55,7 @@ MESSAGE("Boost Libraries: ${Boost_LIBRARIES}")
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 
 
+
 #########################################################
 # M3d LIB
 #########################################################
@@ -70,11 +70,17 @@ target_link_libraries(simpleWrtier ${Boost_LIBRARIES} ${Boost_LIBRARIES} m3d_dri
 #########################################################
 # Simple example OpenGL
 #########################################################
-if(OPENGL_FOUND AND GLUT_FOUND)
+set (M3D_BUILD_EXAMPLE_GLUT TRUE CACHE BOOL "Build GLUT Example")
+
+if(M3D_BUILD_EXAMPLE_GLUT AND OPENGL_FOUND AND GLUT_FOUND)
 	add_executable(simpleGL examples/simpleGL.cpp)
 	target_link_libraries(simpleGL  m3d_driver_lib ${OPENGL_LIBRARIES} ${Boost_LIBRARIES} ${GLUT_LIBRARY} )
 
 endif()
 
 file(COPY ${CMAKE_SOURCE_DIR}/sampleConfig/3dUnitCfg.xml  DESTINATION ${CMAKE_BINARY_DIR})
+
+
+
+add_subdirectory(tools/ManualCalibration)
 

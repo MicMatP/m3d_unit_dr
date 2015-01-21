@@ -1,0 +1,105 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include <QDebug>
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+
+    //viewer->setWindowName("test");
+    // Set up the QVTK window
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::onTrigger(QAction* action)
+{
+    qDebug()<< action;
+    _scanWindow.rawPc1 = &rawPointcloud1;
+    _scanWindow.rawPc2 = &rawPointcloud2;
+
+    if (action->objectName() == "actionMake_A_measurment")
+    {
+        _scanWindow.show();
+    }
+    myGlWidget* gl = dynamic_cast<myGlWidget*>(ui->widget);
+    gl->setPoincloud(&pc1,&pc2);
+    UpdatePC();
+}
+void MainWindow::UpdatePC ()
+{
+    setMatrix();
+    qDebug()<<"updating pc";
+    pc1.data.clear();
+    pc2.data.clear();
+
+    for (int j=0; j<rawPointcloud1.angles.size(); j++)
+    {
+        float ang = rawPointcloud1.angles[j];
+        glm::mat4 affine3Dunit = glm::rotate(glm::mat4(1.0f), ang, glm::vec3(0.0f, 0.0f, 1.0f));
+        lms_measurement* meas = &(rawPointcloud1.ranges[j]);
+        for (int i =0; i < meas->echoes[0].data.size(); i++)
+        {
+            float d =   meas->echoes[0].data[i]*meas->echoes[0].scallingFactor;
+            float lasAng = float(1.0*i *( meas->echoes[0].angStepWidth)  -135.0f);
+
+            glm::vec4 in (d, 0.0, 0.0f, 1.0f);
+            glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f), glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
+            //glm::mat4 calib = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, -50.0f));
+            glm::mat4 cor = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f),glm::vec3(0.0f, 1.0f, 0.0f));
+
+            //glm::mat4 dAffine = glm::matrixCompMult(affineLaser, affine);
+            glm::vec4 out =affine3Dunit* cor* calib* affineLaser * in;
+            pc1.data.push_back(glm::vec3(out));
+            //if (lit->profile.rssis.size()>0)collectingPointCloud.intensity.push_back( lit->profile.rssis[0].data[i]);
+        }
+    }
+    for (int j=0; j<rawPointcloud2.angles.size(); j++)
+    {
+        float ang = rawPointcloud2.angles[j];
+        glm::mat4 affine3Dunit = glm::rotate(glm::mat4(1.0f), ang, glm::vec3(0.0f, 0.0f, 1.0f));
+        lms_measurement* meas = &(rawPointcloud2.ranges[j]);
+        for (int i =0; i < meas->echoes[0].data.size(); i++)
+        {
+            float d =   meas->echoes[0].data[i]*meas->echoes[0].scallingFactor;
+            float lasAng = float(1.0*i *( meas->echoes[0].angStepWidth)  -135.0f);
+
+            glm::vec4 in (d, 0.0, 0.0f, 1.0f);
+            glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f), glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
+            //glm::mat4 calib = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, -50.0f));
+            glm::mat4 cor = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f),glm::vec3(0.0f, 1.0f, 0.0f));
+
+            //glm::mat4 dAffine = glm::matrixCompMult(affineLaser, affine);
+            glm::vec4 out =affine3Dunit* cor* calib* affineLaser * in;
+            pc2.data.push_back(glm::vec3(out));
+            //if (lit->profile.rssis.size()>0)collectingPointCloud.intensity.push_back( lit->profile.rssis[0].data[i]);
+        }
+    }
+}
+
+void MainWindow::setMatrix()
+{
+    float x = ui->doubleSpinBox_X->value();
+    float y = ui->doubleSpinBox_Y->value();
+    float z = ui->doubleSpinBox_Z->value();
+    float yaw = ui->doubleSpinBox_yaw->value();
+    float roll = ui->doubleSpinBox_roll->value();
+    float pitch = ui->doubleSpinBox_pitch->value();
+    setCalib(x,y,z,yaw,pitch,roll);
+
+}
+
+void MainWindow::setCalib(float x,float y, float z, float yaw,float pitch, float roll)
+{
+
+    calib =  glm::translate(glm::eulerAngleYXZ(yaw,pitch,roll), glm::vec3(x,y,z));
+    qDebug()<<calib[0][0]<<calib[0][1]<<calib[0][2]<<calib[0][3];
+    qDebug()<<calib[1][0]<<calib[1][1]<<calib[1][2]<<calib[1][3];
+    qDebug()<<calib[2][0]<<calib[2][1]<<calib[2][2]<<calib[2][3];
+    qDebug()<<calib[3][0]<<calib[3][1]<<calib[3][2]<<calib[3][3];
+
+}

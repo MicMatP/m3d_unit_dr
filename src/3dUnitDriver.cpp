@@ -140,11 +140,10 @@ void _3dUnitDriver::laserThreadWorker()
             profileWithAngle m;
             m.encoder = fabs(curentAngle);
 			m.profile =LMS.currentMessage;
-
 			laserMeasurmentsLock.lock();
 			readyData.push_back(m);
 			laserMeasurmentsLock.unlock();
-            boost::this_thread::sleep(boost::posix_time::millisec(10));
+            boost::this_thread::sleep(boost::posix_time::millisec(5));
 		}
 	}
 	LMS.disconnet();
@@ -156,10 +155,17 @@ void _3dUnitDriver::getPointCloud(pointcloud &pc)
 	pointcloudLock.lock();
 	pc.data = lastPointCloud.data;
 	pc.intensity = lastPointCloud.intensity;
-
 	pointcloudLock.unlock();
 }
 
+
+void _3dUnitDriver::getRawPointCloud(rawPointcloud &pc)
+{
+	pointcloudLock.lock();
+	pc.angles = lastRawPointCloud.angles;
+	pc.ranges = lastRawPointCloud.ranges;
+	pointcloudLock.unlock();
+}
 void _3dUnitDriver::combineThread()
 {
 
@@ -190,6 +196,7 @@ void _3dUnitDriver::combineThread()
 				glm::mat4 affine3Dunit = glm::rotate(glm::mat4(1.0f), ang, glm::vec3(0.0f, 0.0f, 1.0f));
 
 
+
 				for (int i =0; i < lit->profile.echoes[0].data.size(); i++)
 				{
 
@@ -206,8 +213,10 @@ void _3dUnitDriver::combineThread()
 					if (lit->profile.rssis.size()>0)collectingPointCloud.intensity.push_back( lit->profile.rssis[0].data[i]);
 				}
 
-                float dAngle = fabs(lit->encoder-lastAngleCollection);
+				collectingRawpointcloud.angles.push_back(lit->encoder);
+				collectingRawpointcloud.ranges.push_back(lit->profile);
 
+                float dAngle = fabs(lit->encoder-lastAngleCollection);
 				if (dAngle > 1*M_PI || (dAngle!=dAngle)) dAngle=0;
 
 				angleCollection=angleCollection+dAngle;
@@ -224,8 +233,16 @@ void _3dUnitDriver::combineThread()
 					{
 						lastPointCloud.data = collectingPointCloud.data;
 						lastPointCloud.intensity = collectingPointCloud.intensity;
+
+						lastRawPointCloud.ranges = collectingRawpointcloud.ranges;
+						lastRawPointCloud.angles = collectingRawpointcloud.angles;
+
+
 						collectingPointCloud.data.clear();
 						collectingPointCloud.intensity.clear();
+						collectingRawpointcloud.angles.clear();
+						collectingRawpointcloud.ranges.clear();
+
 					}
 					pointcloudLock.unlock();
 					_newPointCloud = true;
