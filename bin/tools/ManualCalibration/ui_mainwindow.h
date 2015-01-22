@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.2.1
+** Created by: Qt User Interface Compiler version 5.1.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -34,10 +34,11 @@ QT_BEGIN_NAMESPACE
 class Ui_MainWindow
 {
 public:
-    QAction *actionOpenCalibration_File;
+    QAction *actionOpenMeasurment;
     QAction *actionMake_A_measurment;
-    QAction *actionSave_Project;
+    QAction *actionSave_Measurment;
     QAction *actionSave_pointcloud;
+    QAction *actionSave_m3dUnit_config;
     QWidget *centralwidget;
     QHBoxLayout *horizontalLayout;
     QFrame *frame;
@@ -61,6 +62,7 @@ public:
     QPushButton *pushButton;
     QMenuBar *menubar;
     QMenu *menuFile;
+    QMenu *menuConfig;
     QStatusBar *statusbar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -68,14 +70,16 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->resize(800, 600);
-        actionOpenCalibration_File = new QAction(MainWindow);
-        actionOpenCalibration_File->setObjectName(QStringLiteral("actionOpenCalibration_File"));
+        actionOpenMeasurment = new QAction(MainWindow);
+        actionOpenMeasurment->setObjectName(QStringLiteral("actionOpenMeasurment"));
         actionMake_A_measurment = new QAction(MainWindow);
         actionMake_A_measurment->setObjectName(QStringLiteral("actionMake_A_measurment"));
-        actionSave_Project = new QAction(MainWindow);
-        actionSave_Project->setObjectName(QStringLiteral("actionSave_Project"));
+        actionSave_Measurment = new QAction(MainWindow);
+        actionSave_Measurment->setObjectName(QStringLiteral("actionSave_Measurment"));
         actionSave_pointcloud = new QAction(MainWindow);
         actionSave_pointcloud->setObjectName(QStringLiteral("actionSave_pointcloud"));
+        actionSave_m3dUnit_config = new QAction(MainWindow);
+        actionSave_m3dUnit_config->setObjectName(QStringLiteral("actionSave_m3dUnit_config"));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
         centralwidget->setMouseTracking(true);
@@ -195,16 +199,19 @@ public:
         menubar->setGeometry(QRect(0, 0, 800, 25));
         menuFile = new QMenu(menubar);
         menuFile->setObjectName(QStringLiteral("menuFile"));
+        menuConfig = new QMenu(menubar);
+        menuConfig->setObjectName(QStringLiteral("menuConfig"));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName(QStringLiteral("statusbar"));
         MainWindow->setStatusBar(statusbar);
 
         menubar->addAction(menuFile->menuAction());
-        menuFile->addAction(actionOpenCalibration_File);
+        menubar->addAction(menuConfig->menuAction());
+        menuFile->addAction(actionOpenMeasurment);
         menuFile->addAction(actionMake_A_measurment);
-        menuFile->addAction(actionSave_Project);
-        menuFile->addAction(actionSave_pointcloud);
+        menuFile->addAction(actionSave_Measurment);
+        menuConfig->addAction(actionSave_m3dUnit_config);
 
         retranslateUi(MainWindow);
         QObject::connect(menubar, SIGNAL(triggered(QAction*)), MainWindow, SLOT(onTrigger(QAction*)));
@@ -216,10 +223,11 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
-        actionOpenCalibration_File->setText(QApplication::translate("MainWindow", "OpenCalibration File", 0));
+        actionOpenMeasurment->setText(QApplication::translate("MainWindow", "Open Measurment", 0));
         actionMake_A_measurment->setText(QApplication::translate("MainWindow", "Make A measurment", 0));
-        actionSave_Project->setText(QApplication::translate("MainWindow", "Save Project", 0));
+        actionSave_Measurment->setText(QApplication::translate("MainWindow", "Save Measurment", 0));
         actionSave_pointcloud->setText(QApplication::translate("MainWindow", "Save pointcloud", 0));
+        actionSave_m3dUnit_config->setText(QApplication::translate("MainWindow", "save m3dUnit config", 0));
         groupBox->setTitle(QApplication::translate("MainWindow", "LaserOffset", 0));
         label->setText(QApplication::translate("MainWindow", "X:", 0));
         label_2->setText(QApplication::translate("MainWindow", "Y:", 0));
@@ -229,6 +237,7 @@ public:
         label_6->setText(QApplication::translate("MainWindow", "roll:", 0));
         pushButton->setText(QApplication::translate("MainWindow", "PushButton", 0));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
+        menuConfig->setTitle(QApplication::translate("MainWindow", "Config", 0));
     } // retranslateUi
 
 };

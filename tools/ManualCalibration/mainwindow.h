@@ -1,9 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
-#include <QMainWindow>
-#include "3dUnitDriver.hpp"
 #include "scanwindow.h"
+#include <QMainWindow>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
 namespace Ui {

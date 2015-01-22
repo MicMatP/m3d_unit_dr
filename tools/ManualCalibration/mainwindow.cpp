@@ -1,9 +1,12 @@
+#include "3dUnitTypeSerialization.hpp"
+#include <boost/log/expressions.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
-#include "3dUnitTypeSerialization.hpp"
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
+
 #include <QFileDialog>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -39,9 +42,13 @@ void MainWindow::onTrigger(QAction* action)
         boost::property_tree::ptree pt;
         m3d::typeSerialization::serialize(pt, rawPointcloud1, "rawPointcloud1");
         m3d::typeSerialization::serialize(pt, rawPointcloud2, "rawPointcloud2");
-
-        boost::property_tree::xml_writer_settings<char> settings('\t', 1);
+#ifdef _WIN32
+		boost::property_tree::write_xml(fileName.toStdString(), pt);
+#else
+		boost::property_tree::xml_writer_settings<char> settings('\t', 1);
         boost::property_tree::write_xml(fileName.toStdString(), pt, std::locale(), settings);
+#endif
+		
     }
 
     if (action->objectName() =="actionOpenMeasurment")
@@ -77,10 +84,13 @@ void MainWindow::onTrigger(QAction* action)
         m3d::typeSerialization::serialize(m3dConfig, calib, "calibration");
         pt.add_child("m3dUnitDriver", m3dConfig);
 
+#ifdef _WIN32
+		//no pretty print on windows - bug in BOOST??
+		boost::property_tree::write_xml(fileName.toStdString(), pt);
+#else
         boost::property_tree::xml_writer_settings<char> settings('\t', 1);
-
         boost::property_tree::write_xml(fileName.toStdString(), pt, std::locale(), settings);
-
+#endif
     }
     myGlWidget* gl = dynamic_cast<myGlWidget*>(ui->widget);
     gl->setPoincloud(&pc1,&pc2);

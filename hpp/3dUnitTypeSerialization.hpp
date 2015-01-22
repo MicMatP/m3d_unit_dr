@@ -1,5 +1,6 @@
 #ifndef TYPE_SERIALIZATION_HPP
 #define TYPE_SERIALIZATION_HPP
+#include "m3d_driver_lib_export.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -8,11 +9,11 @@
 using boost::property_tree::ptree;
 namespace m3d
 {
-    class typeSerialization
+    class M3D_DRIVER_LIB_EXPORT typeSerialization
     {
     public:
-        static void serialize(boost::property_tree::ptree &pt,m3d::rawPointcloud &v, std::string id);
 
+        static void serialize(boost::property_tree::ptree &pt,m3d::rawPointcloud &v, std::string id);
         static void deserialize(boost::property_tree::ptree &pt, m3d::rawPointcloud &v, std::string id);
 
         static void serialize(boost::property_tree::ptree &pt, lms_channel &m, std::string id);

@@ -28,7 +28,7 @@ void scanWindow::makeScan()
 
     driver->requestPointcloud();
     driver->waitForPointCloud();
-
+	driver->waitForPointCloud();
     driver->getRawPointCloud(*rawPc1);
     qDebug()<<"got first pointcloud ";
     driver->waitForPointCloud();
