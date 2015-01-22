@@ -39,3 +39,12 @@ void scanWindow::makeScan()
     this->hide();
     //delete driver;
 }
+std::string scanWindow::getIpRotLaser()
+{
+    return ui->laserIp->text().toStdString();
+}
+
+std::string scanWindow::getIpUnit()
+{
+    return ui->unitIP->text().toStdString();
+}

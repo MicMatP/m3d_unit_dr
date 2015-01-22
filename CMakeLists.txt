@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
+SET(CMAKE_BUILD_TYPE Debug)
 
 PROJECT(MANDALA_3dUnit)
 #iF YOU DOES NOT HAVE LIBRARIES IN PATH, YOU CAN EASILY DEFINE ALL HERE
@@ -14,7 +15,7 @@ IF (WIN32)
 ENDIF()
 
 
-SET(_FILES_m3d src/lms_mini_lib.cpp src/3dUnitDriver.cpp src/encoder_driver.cpp )
+SET(_FILES_m3d src/lms_mini_lib.cpp src/3dUnitDriver.cpp src/encoder_driver.cpp src/3dUnitTypeSerialization.cpp )
 SET(_HEADERS_m3d hpp/lms_mini_lib.hpp src/3dUnitDriver.hpp src/encoder_driver.hpp )
 
 

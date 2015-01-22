@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #define M_PI 3.14159265358979323846
 #include <logger.hpp>
-
+#include "3dUnitTypeSerialization.hpp"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -31,15 +31,24 @@ bool _3dUnitConfig::readConfigFromXML(std::string fileName)
 		exit(-1);
 	}
 
-	try {
+    try {
 		frontLaserIp = pt.get<std::string>("m3dUnitDriver.adresses.frontLaser");
 		rotLaserIp = pt.get<std::string>("m3dUnitDriver.adresses.rotLaser");
-		unitIp= pt.get<std::string> ("m3dUnitDriver.adresses.unit");
-	}
-	catch (...)
-	{
+        unitIp= pt.get<std::string> ("m3dUnitDriver.adresses.unit");
+        ptree locpt = pt.get_child("m3dUnitDriver");
+        m3d::typeSerialization::deserialize(locpt, calibMatrix, "calibration");
+    }
+    catch (...)
+    {
 
-	}
+    }
+    LOG_INFO("Configuration readed");
+    LOG_INFO("calibration matrix");
+    LOG_INFO("\t"<<calibMatrix[0][0]<<"\t"<<calibMatrix[0][1]<<"\t"<<calibMatrix[0][2]<<"\t"<<calibMatrix[0][3]<<"\t");
+    LOG_INFO("\t"<<calibMatrix[1][0]<<"\t"<<calibMatrix[1][1]<<"\t"<<calibMatrix[1][2]<<"\t"<<calibMatrix[1][3]<<"\t");
+    LOG_INFO("\t"<<calibMatrix[2][0]<<"\t"<<calibMatrix[2][1]<<"\t"<<calibMatrix[2][2]<<"\t"<<calibMatrix[2][3]<<"\t");
+    LOG_INFO("\t"<<calibMatrix[3][0]<<"\t"<<calibMatrix[3][1]<<"\t"<<calibMatrix[3][2]<<"\t"<<calibMatrix[3][3]<<"\t");
+
 	LOG_INFO("front laser IP     :" << frontLaserIp);
 	LOG_INFO("roatation laser IP : "<< rotLaserIp);
 	LOG_INFO("unit IP            :" << unitIp);
@@ -80,6 +89,12 @@ _3dUnitDriver::_3dUnitDriver(_3dUnitConfig config)
 	lmsIp =config.rotLaserIp;
 	unitIp=config.unitIp;
 	newSpeed =-1.0f;
+    calib = config.calibMatrix;
+    LOG_INFO("calibration matrix");
+    LOG_INFO("\t"<<calib[0][0]<<"\t"<<calib[0][1]<<"\t"<<calib[0][2]<<"\t"<<calib[0][3]<<"\t");
+    LOG_INFO("\t"<<calib[1][0]<<"\t"<<calib[1][1]<<"\t"<<calib[1][2]<<"\t"<<calib[1][3]<<"\t");
+    LOG_INFO("\t"<<calib[2][0]<<"\t"<<calib[2][1]<<"\t"<<calib[2][2]<<"\t"<<calib[2][3]<<"\t");
+    LOG_INFO("\t"<<calib[3][0]<<"\t"<<calib[3][1]<<"\t"<<calib[3][2]<<"\t"<<calib[3][3]<<"\t");
 	collectingPointcloud=false;
 	_newPointCloud=false;
 }
@@ -204,7 +219,7 @@ void _3dUnitDriver::combineThread()
 					float d = lit->profile.echoes[0].data[i];
 					glm::vec4 in (d, 0.0, 0.0f, 1.0f);
 					glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f), glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
-					glm::mat4 calib = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, -50.0f));
+                    //glm::mat4 calib = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, -50.0f));
 					glm::mat4 cor = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f),glm::vec3(0.0f, 1.0f, 0.0f));
 
 					//glm::mat4 dAffine = glm::matrixCompMult(affineLaser, affine);

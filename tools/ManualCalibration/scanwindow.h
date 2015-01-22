@@ -17,6 +17,11 @@ public:
      m3d::rawPointcloud *rawPc1;
      m3d::rawPointcloud *rawPc2;
 
+     std::string getIpRotLaser();
+     std::string getIpUnit();
+
+
+
 private:
     Ui::scanWindow *ui;
 

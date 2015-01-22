@@ -1,6 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
+#include "3dUnitTypeSerialization.hpp"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <QFileDialog>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -25,6 +29,58 @@ void MainWindow::onTrigger(QAction* action)
     if (action->objectName() == "actionMake_A_measurment")
     {
         _scanWindow.show();
+    }
+    else
+    if (action->objectName() =="actionSave_Measurment")
+    {
+        QString fileName = QFileDialog::getSaveFileName(this,
+                 tr("Open XML File 1"), "/home", tr("Measurments (*.m3dMeas)"));
+        if (fileName.size()==0) return;
+        boost::property_tree::ptree pt;
+        m3d::typeSerialization::serialize(pt, rawPointcloud1, "rawPointcloud1");
+        m3d::typeSerialization::serialize(pt, rawPointcloud2, "rawPointcloud2");
+
+        boost::property_tree::xml_writer_settings<char> settings('\t', 1);
+        boost::property_tree::write_xml(fileName.toStdString(), pt, std::locale(), settings);
+    }
+
+    if (action->objectName() =="actionOpenMeasurment")
+    {
+        QString fileName = QFileDialog::getOpenFileName(this,
+                 tr("Open XML File 1"), "/home", tr("Measurments (*.m3dMeas)"));
+        if (fileName.size()==0) return;
+        boost::property_tree::ptree pt;
+        boost::property_tree::read_xml(fileName.toStdString(), pt);
+        m3d::typeSerialization::deserialize(pt, rawPointcloud1, "rawPointcloud1");
+        m3d::typeSerialization::deserialize(pt, rawPointcloud2, "rawPointcloud2");
+
+    }
+
+    if (action->objectName() =="actionSave_m3dUnit_config")
+    {
+        QString fileName = QFileDialog::getSaveFileName(this,
+                 tr("Open XML File 1"), "/home", tr("Config (*.xml)"));
+        if (fileName.size()==0) return;
+
+        boost::property_tree::ptree pt;
+
+        boost::property_tree::ptree m3dConfig;
+
+        boost::property_tree::ptree adresses;
+
+        adresses.add("frontLaser","0.0.0.0");
+        adresses.add("rotLaser",_scanWindow.getIpRotLaser());
+        adresses.add("unit",_scanWindow.getIpUnit());
+
+
+        m3dConfig.add_child("adresses", adresses);
+        m3d::typeSerialization::serialize(m3dConfig, calib, "calibration");
+        pt.add_child("m3dUnitDriver", m3dConfig);
+
+        boost::property_tree::xml_writer_settings<char> settings('\t', 1);
+
+        boost::property_tree::write_xml(fileName.toStdString(), pt, std::locale(), settings);
+
     }
     myGlWidget* gl = dynamic_cast<myGlWidget*>(ui->widget);
     gl->setPoincloud(&pc1,&pc2);

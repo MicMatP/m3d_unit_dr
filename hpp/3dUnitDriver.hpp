@@ -25,8 +25,7 @@ namespace m3d
 {
 	struct M3D_DRIVER_LIB_EXPORT _3dUnitConfig
 	{
-		float rotationLaserMatrix[16];
-		float frontlaserMatrix[16];
+        glm::mat4 calibMatrix;
 		std::string unitIp;
 		std::string frontLaserIp;
 		std::string rotLaserIp;
@@ -109,7 +108,7 @@ namespace m3d
 		///sets a calibrating matrix
 		inline void setMatrixCalibMatrix(glm::mat4 m)
 		{
-			laserCalibrationMatrix =m;
+            calib =m;
 		}
 		///request pointcloud
 		inline void requestPointcloud()
@@ -188,7 +187,7 @@ namespace m3d
 		rawPointcloud lastRawPointCloud;
 
 
-		glm::mat4 laserCalibrationMatrix;
+        glm::mat4 calib;
 		// new requested speed;
 		float newSpeed;
 	

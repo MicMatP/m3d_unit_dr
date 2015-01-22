@@ -1,28 +1,26 @@
 #ifndef TYPE_SERIALIZATION_HPP
 #define TYPE_SERIALIZATION_HPP
-
-
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include "3dUnitDriver.hpp"
 using boost::property_tree::ptree;
-
-class m3d::typeSerialization
+namespace m3d
 {
+    class typeSerialization
+    {
+    public:
+        static void serialize(boost::property_tree::ptree &pt,m3d::rawPointcloud &v, std::string id);
 
-    static void read(std::fileName);
-    static void write(std::fileName);
+        static void deserialize(boost::property_tree::ptree &pt, m3d::rawPointcloud &v, std::string id);
 
+        static void serialize(boost::property_tree::ptree &pt, lms_channel &m, std::string id);
+        static void deserialize(boost::property_tree::ptree &pt, lms_channel &m, std::string id);
 
-    static void push(m3d::rawPointcloud &v, std::string id);
+        static void deserialize(boost::property_tree::ptree &pt, glm::mat4 &m, std::string id);
+        static void serialize(boost::property_tree::ptree &pt, glm::mat4 &m, std::string id);
 
-    static void get(m3d::rawPointcloud &v, std::string id);
-
-
-
-private:
-   static boost::property_tree::ptree pt;
-
+    };
 };
-
 #endif
