@@ -85,4 +85,5 @@ file(COPY ${CMAKE_SOURCE_DIR}/sampleConfig/3dUnitCfg.xml  DESTINATION ${CMAKE_BI
 
 
 add_subdirectory(tools/ManualCalibration)
+add_subdirectory(tools/PCLCalibration )
 
