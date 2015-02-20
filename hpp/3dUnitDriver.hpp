@@ -89,6 +89,15 @@ namespace m3d
 		{
 			deinitialize();
 		}
+
+		///get current angle (in radians)
+		inline float getCurrentAngle()
+		{
+			encMeasurmentLock.lock();
+			float enc =  curentAngle;
+			encMeasurmentLock.unlock();
+			return enc;
+		}
 		///registers a callback called when new pointcloud is recived;
 		inline void setCallbackPointCloud(callback cb) {
 			scanCallback = cb;

@@ -215,7 +215,9 @@ void _3dUnitDriver::combineThread()
 				for (int i =0; i < lit->profile.echoes[0].data.size(); i++)
 				{
 
-					float lasAng = float(1.0*i *(lit->profile.echoes[0].angStepWidth)  -135.0f);
+					//float lasAng = float(1.0*i *(lit->profile.echoes[0].angStepWidth)  -135.0f);
+					float lasAng = float(1.0*i *(lit->profile.echoes[0].angStepWidth)  -lit->profile.echoes[0].startAngle);
+
 					float d = lit->profile.echoes[0].data[i];
 					glm::vec4 in (d, 0.0, 0.0f, 1.0f);
 					glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f), glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
