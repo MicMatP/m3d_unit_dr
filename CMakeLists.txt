@@ -80,11 +80,13 @@ if(M3D_BUILD_EXAMPLE_GLUT AND OPENGL_FOUND AND GLUT_FOUND)
 
 endif()
 
-file(COPY ${CMAKE_SOURCE_DIR}/sampleConfig/3dUnitCfg.xml  DESTINATION ${CMAKE_BINARY_DIR})
+#file(COPY ${CMAKE_SOURCE_DIR}/sampleConfig/3dUnitCfg.xml  DESTINATION ${CMAKE_BINARY_DIR})
 
 
 
 add_subdirectory(tools/ManualCalibration)
 add_subdirectory(tools/PCLCalibration )
 add_subdirectory(tools/EncoderTest )
+add_subdirectory(tools/rawMeasurmentToTxt)
+
 

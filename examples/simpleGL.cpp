@@ -1,11 +1,22 @@
 
 #include <GL/glut.h>
 #include <boost/thread/mutex.hpp>
+#include <boost/date_time.hpp>
 #include <3dUnitDriver.hpp>
+#include <3dUnitTypeSerialization.hpp>
+#include <fstream>
 #define KEY_ESCAPE 27
 
 #define _SCALE 1
 #define _ROTATE 2
+bool saveRequestTXT = false;
+bool saveRequestRAW = false;
+
+#define _GLUT_MENU_TXT 1
+#define _GLUT_MENU_RAW 2
+#define _GLUT_MENU_RAWTXT 3
+#define _GLUT_MENU_PAUSE 4
+#define _GLUT_MENU_RENEW 5
 
 
 typedef struct {
@@ -38,7 +49,11 @@ m3d::_3dUnitDriver* driver;
 float _3dUnitSpeed =20;
 
 
-
+std::string getDateTimeFileName()
+{
+	boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
+	return "scan"+boost::posix_time::to_iso_string(now);
+}
 void colorize(float in, float max)
 {
 	float _in = in/max;
@@ -71,13 +86,49 @@ void display()
 
 		// Draw the teapot
 	    //glutSolidTeapot(1);
+		std::string actualprogress = boost::lexical_cast<std::string,float>(driver->getCurrentProgress());
+		actualprogress = "actualprogress "+actualprogress;
+		glutSetWindowTitle(actualprogress.c_str());
 		glPointSize(pointSize);
+
 		glBegin(GL_POINTS);
 		pcMutex.lock();
 		for (int i=0; i < pc.data.size(); i++)
 		{
 			if (pc.intensity.size() == pc.data.size()) colorize(pc.intensity[i],1000);
 			glVertex3f(pc.data[i].x,pc.data[i].z,pc.data[i].y);
+		}
+		if (saveRequestTXT)
+		{
+			saveRequestTXT = false;
+			std::ofstream ofile;
+			std::string fn = getDateTimeFileName()+".txt";
+			ofile.open(fn);
+			if (ofile.is_open()) std::cout <<"file is opened "<< fn<<"\n";
+			for (int i=0; i < pc.data.size(); i++)
+			{
+				ofile << pc.data[i].x<<"\t"<<pc.data[i].y<<"\t"<<pc.data[i].z;
+				if (pc.intensity.size() == pc.data.size()) {ofile<<"\t"<<pc.intensity[i];};
+				ofile<<"\n";
+			}
+			std::cout <<"saved\n";
+			ofile.close();
+		}
+		if (saveRequestRAW)
+		{
+			saveRequestRAW =false;
+			std::cout << "getting raw pointcloud \n";
+			m3d::rawPointcloud raw;
+			driver->getRawPointCloud(raw);
+			std::string fn = getDateTimeFileName()+".meas";
+			using boost::property_tree::ptree;
+			ptree pt;
+			std::cout << "serializing \n";
+			m3d::typeSerialization::serialize(pt,raw, "raw1");
+			std::cout << "saving \n";
+		
+			write_xml(fn, pt, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>(' ', 1u));
+			std::cout << "DONE! \n";
 		}
 		pcMutex.unlock();
 		glEnd();
@@ -172,12 +223,38 @@ void keyboard ( unsigned char key, int mousePositionX, int mousePositionY )
       break;    
 	case 'x':        
 		pointSize -= 0.2;
-      break;    
+      break;  
+	case 't' :
+		saveRequestTXT = true;
+		break;
     default:      
       break;
   }
 }
+void handle_menu(int i)
+{
+	std::cout <<i<<"\n";
+	if (i == _GLUT_MENU_TXT)
+	{
+		saveRequestTXT = true;
+	}
+	if (i== _GLUT_MENU_RAW)
+	{
+		saveRequestRAW = true;
+	}
+	if (i == _GLUT_MENU_PAUSE)
+	{
+		driver->setSpeed(0);
+		driver->deinitialize();
+	}
+	if (i == _GLUT_MENU_RENEW)
+	{
+		driver->initialize();
+		driver->setSpeed(_3dUnitSpeed);
+		
+	}
 
+}
 int main(int argc, char **argv) 
 {
 	// FreeGLUT STUFF
@@ -197,7 +274,15 @@ int main(int argc, char **argv)
 		glutDisplayFunc(display);						
 		glutIdleFunc( display );						
 		glutMouseFunc(mouseButton);
-		glutKeyboardFunc( keyboard );					
+		glutKeyboardFunc( keyboard );
+		glutCreateMenu(handle_menu);
+		glutAddMenuEntry("save as TXT",_GLUT_MENU_TXT);
+		glutAddMenuEntry("save as RAW_MEAS",_GLUT_MENU_RAW);
+		glutAddMenuEntry("PAUSE",_GLUT_MENU_PAUSE);
+		glutAddMenuEntry("RENEW",_GLUT_MENU_RENEW);
+
+		glutAttachMenu(GLUT_MIDDLE_BUTTON);
+
 		initialize();
 	}
 

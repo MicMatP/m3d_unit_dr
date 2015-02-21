@@ -21,7 +21,7 @@ void scanWindow::makeScan()
     m3d::_3dUnitConfig cfg;
     cfg.rotLaserIp = ui->laserIp->text().toStdString();
     cfg.unitIp = ui->unitIP->text().toStdString();
-
+	cfg.maximumAngleOfScan = 2*3.1415;
     m3d::_3dUnitDriver* driver =new m3d::_3dUnitDriver(cfg);
     driver->initialize();
     driver->setSpeed(ui->speed->sliderPosition());

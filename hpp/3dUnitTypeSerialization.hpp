@@ -22,6 +22,7 @@ namespace m3d
         static void deserialize(boost::property_tree::ptree &pt, glm::mat4 &m, std::string id);
         static void serialize(boost::property_tree::ptree &pt, glm::mat4 &m, std::string id);
 
+		static void saveTXT(std::string fn, m3d::pointcloud &pc);
     };
 };
 #endif

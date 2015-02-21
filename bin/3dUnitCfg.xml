@@ -5,9 +5,14 @@
 		<rotLaser>192.168.0.197</rotLaser>
 		<unit>192.168.0.150</unit>
 	</adresses>
+	<angles>
+	 <maximum> 6.3 </maximum>
+	 <laserOffset>3.1416 </laserOffset>
+	</angles>
+	
 	<calibration>
 		<__type>Mat4</__type>
-		<__method>matrix</__method>
-		<data>1	0	0	0	0	1	0	0	0	0	1	0	0	0	0	1	</data>
+		<__method>XYZYPR</__method>
+		<data>0 144 0 0 0 0</data>
 	</calibration>
 </m3dUnitDriver>

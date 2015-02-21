@@ -25,6 +25,9 @@ namespace m3d
 {
 	struct M3D_DRIVER_LIB_EXPORT _3dUnitConfig
 	{
+		float angularOffsetRotLaser;
+		float angularOffsetUnitLaser;
+		float maximumAngleOfScan;
         glm::mat4 calibMatrix;
 		std::string unitIp;
 		std::string frontLaserIp;
@@ -90,6 +93,11 @@ namespace m3d
 			deinitialize();
 		}
 
+		inline float getCurrentProgress()
+		{
+			return progress; 
+		}
+		
 		///get current angle (in radians)
 		inline float getCurrentAngle()
 		{
@@ -172,8 +180,8 @@ namespace m3d
 
 		std::string lmsIp;
 		std::string unitIp;
-		
-
+		/// progress
+		float progress;
 		///buffer of measurments for m3dunit
 		std::vector<encoderMeasurment> encMeasurmentBuffer;
 		///buffer of profiles with angle applied
@@ -209,7 +217,12 @@ namespace m3d
 		///an asynchronuous callback on recived profile;
 		callback profileCallback;
 
+		/// maximum angle
+		float maximumScanAngle;
 
+		///usefull offsets
+		float angularOffsetRotLaser;
+		float angularOffsetUnitLaser;
 	};
 
 

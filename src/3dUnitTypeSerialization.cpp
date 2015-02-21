@@ -2,7 +2,7 @@
 #include <boost/foreach.hpp>
 #include "logger.hpp"
 #include <boost/optional/optional.hpp>
-
+#include <glm/gtx/euler_angles.hpp>
 using namespace m3d;
 
 
@@ -58,7 +58,7 @@ void typeSerialization::serialize(boost::property_tree::ptree &pt, lms_channel &
     std::stringstream ss;
     for (int i=0; i< m.data.size();i++)
     {
-        ss<<m.data[i]<<'\t';
+        ss<<m.data[i]<<' ';
     }
     p.add("data", ss.str());
     pt.add_child(id, p);
@@ -140,6 +140,18 @@ void typeSerialization::deserialize(boost::property_tree::ptree &pt, glm::mat4 &
         ss>>m[2][0]>>m[2][1]>>m[2][2]>>m[2][3];
         ss>>m[3][0]>>m[3][1]>>m[3][2]>>m[3][3];
     }
+	if (method.compare("XYZYPR") ==0)
+	{
+		std::string data  =  pLocal.get<std::string>("data");
+        std::stringstream ss(data);
+		float floats[7];
+		ss>>floats[0]>>floats[1]>>floats[2];
+		ss>>floats[3]>>floats[4]>>floats[5];
+		glm::mat4x4 t,r;
+		t = glm::translate(glm::mat4(1.0f),glm::vec3(floats[0],floats[1],floats[2]));
+		r=glm::yawPitchRoll(floats[3],floats[4],floats[5]);
+		m = r*t;
+	}
 }
 
 void typeSerialization::serialize(boost::property_tree::ptree &pt, glm::mat4 &m, std::string id)
@@ -155,4 +167,20 @@ void typeSerialization::serialize(boost::property_tree::ptree &pt, glm::mat4 &m,
     ss<<m[3][0]<<"\t"<<m[3][1]<<"\t"<<m[3][2]<<"\t"<<m[3][3]<<"\t";
     pLocal.add("data", ss.str());
     pt.add_child(id, pLocal);
+}
+
+
+void typeSerialization::saveTXT(std::string fn, m3d::pointcloud &pc)
+{
+	std::ofstream ofile;
+	ofile.open(fn);
+	if (ofile.is_open()) std::cout <<"file is opened "<< fn<<"\n";
+	for (int i=0; i < pc.data.size(); i++)
+	{
+		ofile << pc.data[i].x<<"\t"<<pc.data[i].y<<"\t"<<pc.data[i].z;
+		if (pc.intensity.size() == pc.data.size()) {ofile<<"\t"<<pc.intensity[i];};
+		ofile<<"\n";
+	}
+	std::cout <<"saved\n";
+	ofile.close();
 }

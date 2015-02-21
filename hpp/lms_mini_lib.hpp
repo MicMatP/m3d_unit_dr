@@ -88,6 +88,7 @@ private:
 
 	size_t lastTelegramSize;
  std::string incommingData;
+ std::string softwareBuffer;
  boost::asio::io_service io_service;
  tcp::socket socket;
 };

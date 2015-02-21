@@ -32,11 +32,26 @@ bool _3dUnitConfig::readConfigFromXML(std::string fileName)
 	}
 
     try {
-		frontLaserIp = pt.get<std::string>("m3dUnitDriver.adresses.frontLaser");
+	
+		maximumAngleOfScan = 1.0f*M_PI;
+		angularOffsetRotLaser =0.0f;
+		angularOffsetUnitLaser=0.0f;
+		boost::optional<float> op_maximumAngleOfScan = pt.get_optional<float>("m3dUnitDriver.angles.maximum");
+		boost::optional<float> op_angularOffsetRotLaser = pt.get_optional<float> ("m3dUnitDriver.angles.laserOffset");
+		boost::optional<float> op_angularOffsetUnitLaser = pt.get_optional<float> ("m3dUnitDriver.angles.unitOffset");
+
+
+		if(op_maximumAngleOfScan) maximumAngleOfScan = *op_maximumAngleOfScan;
+		if(op_angularOffsetRotLaser) angularOffsetRotLaser =*op_angularOffsetRotLaser;
+		if(op_angularOffsetUnitLaser) angularOffsetUnitLaser =*op_angularOffsetUnitLaser;
+
 		rotLaserIp = pt.get<std::string>("m3dUnitDriver.adresses.rotLaser");
         unitIp= pt.get<std::string> ("m3dUnitDriver.adresses.unit");
-        ptree locpt = pt.get_child("m3dUnitDriver");
+		ptree locpt = pt.get_child("m3dUnitDriver");
         m3d::typeSerialization::deserialize(locpt, calibMatrix, "calibration");
+	
+		frontLaserIp = pt.get<std::string>("m3dUnitDriver.adresses.frontLaser");
+
     }
     catch (...)
     {
@@ -90,11 +105,15 @@ _3dUnitDriver::_3dUnitDriver(_3dUnitConfig config)
 	unitIp=config.unitIp;
 	newSpeed =-1.0f;
     calib = config.calibMatrix;
+
     LOG_INFO("calibration matrix");
     LOG_INFO("\t"<<calib[0][0]<<"\t"<<calib[0][1]<<"\t"<<calib[0][2]<<"\t"<<calib[0][3]<<"\t");
     LOG_INFO("\t"<<calib[1][0]<<"\t"<<calib[1][1]<<"\t"<<calib[1][2]<<"\t"<<calib[1][3]<<"\t");
     LOG_INFO("\t"<<calib[2][0]<<"\t"<<calib[2][1]<<"\t"<<calib[2][2]<<"\t"<<calib[2][3]<<"\t");
     LOG_INFO("\t"<<calib[3][0]<<"\t"<<calib[3][1]<<"\t"<<calib[3][2]<<"\t"<<calib[3][3]<<"\t");
+	maximumScanAngle = config.maximumAngleOfScan;
+	angularOffsetRotLaser = config.angularOffsetRotLaser;
+	angularOffsetUnitLaser = config.angularOffsetUnitLaser;
 	collectingPointcloud=false;
 	_newPointCloud=false;
 }
@@ -208,7 +227,7 @@ void _3dUnitDriver::combineThread()
 
 			if (ang !=-1)
 			{
-				glm::mat4 affine3Dunit = glm::rotate(glm::mat4(1.0f), ang, glm::vec3(0.0f, 0.0f, 1.0f));
+				glm::mat4 affine3Dunit = glm::rotate(glm::mat4(1.0f), angularOffsetUnitLaser+ang, glm::vec3(0.0f, 0.0f, 1.0f));
 
 
 
@@ -220,7 +239,7 @@ void _3dUnitDriver::combineThread()
 
 					float d = lit->profile.echoes[0].data[i];
 					glm::vec4 in (d, 0.0, 0.0f, 1.0f);
-					glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f), glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
+					glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f), angularOffsetRotLaser+glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
                     //glm::mat4 calib = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, -50.0f));
 					glm::mat4 cor = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f),glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -234,13 +253,19 @@ void _3dUnitDriver::combineThread()
 				collectingRawpointcloud.ranges.push_back(lit->profile);
 
                 float dAngle = fabs(lit->encoder-lastAngleCollection);
-				if (dAngle > 1*M_PI || (dAngle!=dAngle)) dAngle=0;
+				//if greater than M_PI or NAN then dangle
+				if (dAngle > 0.3*M_PI || (dAngle!=dAngle)) dAngle=0;
 
 				angleCollection=angleCollection+dAngle;
 
 
 				angleCollection = angleCollection+dAngle;
-                if (fabs(angleCollection) > 2.2* M_PI)
+				progress =-1.0f;
+				if (angleCollection !=0.f)
+				{
+					progress = angleCollection /( 2.2* maximumScanAngle);
+				}
+				if (fabs(angleCollection) > 2.2* maximumScanAngle)
 				{
 					LOG_DEBUG("get angle :"<<angleCollection);
 					angleCollection = 0.0f;
