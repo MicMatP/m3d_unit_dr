@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <m3dUnitDriver>
+	<outputFolder>outtest</outputFolder>
 	<adresses>
 		<frontLaser>0.0.0.0</frontLaser>
 		<rotLaser>192.168.0.197</rotLaser>
 		<unit>192.168.0.150</unit>
 	</adresses>
 	<angles>
-	 <maximum> 6.3 </maximum>
-	 <laserOffset>3.1416 </laserOffset>
+	 <maximum> 7 </maximum>
+	 <laserOffset>3.22885911619</laserOffset>
 	</angles>
 	
 	<calibration>

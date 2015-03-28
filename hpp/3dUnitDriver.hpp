@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-
+#include <string>
 #include "lms_mini_lib.hpp"
 
 #include "encoder_driver.hpp"
@@ -23,6 +23,7 @@
 
 namespace m3d
 {
+
 	struct M3D_DRIVER_LIB_EXPORT _3dUnitConfig
 	{
 		float angularOffsetRotLaser;
@@ -33,6 +34,7 @@ namespace m3d
 		std::string frontLaserIp;
 		std::string rotLaserIp;
 		bool readConfigFromXML(std::string fileName);
+		std::string outputPath;
 	};
 
 
@@ -85,6 +87,7 @@ namespace m3d
 		/// spawn everything - starts thread for lms, 3dunit, and synchronizer
 		void initialize();
 
+		void initializeEncoderOnly();
 		void deinitialize();
 
 		_3dUnitDriver(_3dUnitConfig config);
@@ -92,10 +95,13 @@ namespace m3d
 		{
 			deinitialize();
 		}
-
 		inline float getCurrentProgress()
 		{
 			return progress; 
+		}
+		inline bool get_is_initialized()
+		{
+			return is_initialized;
 		}
 		
 		///get current angle (in radians)
@@ -134,7 +140,8 @@ namespace m3d
 			angleCollection=0;
 			lastAngleCollection=curentAngle;
 		}
-
+		// cancel currently measured pointcloud and starts new one
+		void startOver();
 		///wait for pointcloud (blocking)
 		inline void waitForPointCloud()
 		{
@@ -154,9 +161,11 @@ namespace m3d
 		/// get pointcloud (non-blocking)
 		void getPointCloud(pointcloud &pc);
 		void getRawPointCloud(rawPointcloud &pc);
+		
 	private:
 		
 
+		bool is_initialized;
 		float getNearestAngle(boost::posix_time::ptime timeStamp);
 
 		void laserThreadWorker();
@@ -225,6 +234,7 @@ namespace m3d
 		float angularOffsetUnitLaser;
 	};
 
-
+	
+	void M3D_DRIVER_LIB_EXPORT transferPc(m3d::rawPointcloud &raw, m3d::pointcloud &normalPc, m3d::_3dUnitConfig &cfg);
 }
 #endif

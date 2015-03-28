@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 	m3d::_3dUnitConfig cfg;
 	cfg.readConfigFromXML("3dunitCfg.xml");
 	d= (new m3d::_3dUnitDriver (cfg));
-	d->initialize();
+	d->initializeEncoderOnly();
 	
 	while (1)
 	{

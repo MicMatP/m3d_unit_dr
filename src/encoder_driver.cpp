@@ -82,7 +82,7 @@ bool driver_encoder::getParam (int paramNo, int subindex, int &paramValue)
 
     std::string data = std::string(buf.begin(), buf.begin()+len).c_str();
 
-
+	
     std::vector<std::string> strs;
     boost::split(strs,data,boost::is_any_of(" "));
 

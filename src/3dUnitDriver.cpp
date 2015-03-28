@@ -16,6 +16,41 @@ SET_DEBUGLVL(_PRINTOUT_INFO);
 
 
 
+void m3d::transferPc(m3d::rawPointcloud &raw, m3d::pointcloud &normalPc, m3d::_3dUnitConfig &cfg)
+{
+
+	std::cout <<"aaa "<<cfg.angularOffsetRotLaser;
+	for (int i=0; i< raw.angles.size(); i++)
+	{
+
+		float ang = raw.angles[i];
+
+		if (ang !=-1)
+		{
+			glm::mat4 affine3Dunit = glm::rotate(glm::mat4(1.0f),cfg.angularOffsetUnitLaser+ang, glm::vec3(0.0f, 0.0f, 1.0f));
+
+
+			auto profile = raw.ranges.begin()+i;
+			for (int i =0; i <profile->echoes[0].data.size(); i++)
+			{
+
+				//float lasAng = float(1.0*i *(lit->profile.echoes[0].angStepWidth)  -135.0f);
+				float lasAng = float(1.0*i *(profile->echoes[0].angStepWidth)  - profile->echoes[0].startAngle);
+
+				float d = profile->echoes[0].data[i];
+				glm::vec4 in (d, 0.0, 0.0f, 1.0f);
+				glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f),  cfg.angularOffsetRotLaser +glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
+				glm::mat4 calib = cfg.calibMatrix;
+				glm::mat4 cor = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f),glm::vec3(0.0f, 1.0f, 0.0f));
+
+				//glm::mat4 dAffine = glm::matrixCompMult(affineLaser, affine);
+				glm::vec4 out =affine3Dunit* cor* calib* affineLaser * in;
+				normalPc.data.push_back(glm::vec3(out.x, out.y,out.z));		
+				if (profile->rssis.size()>0)normalPc.intensity.push_back(profile->rssis[0].data[i]);
+			}
+		}
+	}
+}
 
 bool _3dUnitConfig::readConfigFromXML(std::string fileName)
 {
@@ -39,6 +74,10 @@ bool _3dUnitConfig::readConfigFromXML(std::string fileName)
 		boost::optional<float> op_maximumAngleOfScan = pt.get_optional<float>("m3dUnitDriver.angles.maximum");
 		boost::optional<float> op_angularOffsetRotLaser = pt.get_optional<float> ("m3dUnitDriver.angles.laserOffset");
 		boost::optional<float> op_angularOffsetUnitLaser = pt.get_optional<float> ("m3dUnitDriver.angles.unitOffset");
+
+		boost::optional<std::string> op_outputPath = pt.get_optional<std::string> ("m3dUnitDriver.outputFolder");
+		outputPath ="";
+		if (op_outputPath) outputPath = *op_outputPath;
 
 
 		if(op_maximumAngleOfScan) maximumAngleOfScan = *op_maximumAngleOfScan;
@@ -64,18 +103,44 @@ bool _3dUnitConfig::readConfigFromXML(std::string fileName)
     LOG_INFO("\t"<<calibMatrix[2][0]<<"\t"<<calibMatrix[2][1]<<"\t"<<calibMatrix[2][2]<<"\t"<<calibMatrix[2][3]<<"\t");
     LOG_INFO("\t"<<calibMatrix[3][0]<<"\t"<<calibMatrix[3][1]<<"\t"<<calibMatrix[3][2]<<"\t"<<calibMatrix[3][3]<<"\t");
 
+
 	LOG_INFO("front laser IP     :" << frontLaserIp);
 	LOG_INFO("roatation laser IP : "<< rotLaserIp);
 	LOG_INFO("unit IP            :" << unitIp);
+	LOG_INFO("output folder      :" << outputPath);
 
 	return true;
 
 }
 
+void _3dUnitDriver::initializeEncoderOnly()
+{
+	encThread  =  boost::thread(boost::bind(&_3dUnitDriver::encoderWorker, this));
+	applyPriority(&encThread, ABOVE_NORMAL);
+	boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+}
+
+void _3dUnitDriver::startOver()
+{
+	LOG_INFO ("Starting over pointcloud");
+	LOG_DEBUG("get angle :"<<angleCollection);
+	angleCollection = 0.0f;
+
+	pointcloudLock.lock();
+	{
+		progress = 0;
+		collectingPointCloud.data.clear();
+		collectingPointCloud.intensity.clear();
+		collectingRawpointcloud.angles.clear();
+		collectingRawpointcloud.ranges.clear();
+
+	}
+	pointcloudLock.unlock();
+}
 	void _3dUnitDriver::initialize()
 {
 	newSpeed =-1.0f;
-
+	is_initialized = true;
 	_done = false;
 	LOG_INFO("initializing _3dUnitDriver");
 	lmsThread  =  boost::thread(boost::bind(&_3dUnitDriver::laserThreadWorker, this));
@@ -89,8 +154,7 @@ bool _3dUnitConfig::readConfigFromXML(std::string fileName)
 void _3dUnitDriver::deinitialize()
 {
 	_done = true;
-	
-
+	is_initialized = false;
 	LOG_INFO("waiting for joining threads");
 	lmsThread.join();
 	encThread.join();
@@ -100,6 +164,7 @@ void _3dUnitDriver::deinitialize()
 
 _3dUnitDriver::_3dUnitDriver(_3dUnitConfig config)
 {
+	is_initialized  = false;
 	//LMS.debug();
 	lmsIp =config.rotLaserIp;
 	unitIp=config.unitIp;
