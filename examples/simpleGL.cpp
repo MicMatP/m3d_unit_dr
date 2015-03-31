@@ -85,7 +85,7 @@ void savePointcloud()
 		if (ofile.is_open()) std::cout <<"file is opened "<< fn<<"\n";
 		for (int i=0; i < pc.data.size(); i++)
 		{
-			ofile << pc.data[i].x<<"\t"<<pc.data[i].y<<"\t"<<pc.data[i].z;
+			ofile << -0.001*pc.data[i].x<<"\t"<<0.001*pc.data[i].y<<"\t"<<0.001*pc.data[i].z;
 			if (pc.intensity.size() == pc.data.size()) {ofile<<"\t"<<pc.intensity[i];};
 			ofile<<"\n";
 		}
