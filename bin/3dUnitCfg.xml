@@ -1,4 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- config for "small laser" scaner - LMS100 + light unit -->
+
+<!--  <m3dUnitDriver>
+	<outputFolder>outtest</outputFolder>
+	<adresses>
+		<frontLaser>0.0.0.0</frontLaser>
+		<rotLaser>192.168.0.201</rotLaser>
+		<unit>192.168.0.150</unit>
+	</adresses>
+	<angles>
+			
+	 <maximum>  3.14  </maximum>
+	 <laserOffset>-135.0</laserOffset>
+	</angles>
+	<calibration>
+		<__type>Mat4</__type>
+		<__method>XYZYPR</__method>
+		<data>0 0 0 0 0 0</data>
+	</calibration>
+</m3dUnitDriver>  -->
+
+<!-- 3.2288591161 config for "big laser" scaner - LMS500 + heavy unit -->
+
 <m3dUnitDriver>
 	<outputFolder>outtest</outputFolder>
 	<adresses>
@@ -8,7 +32,7 @@
 	</adresses>
 	<angles>
 	 <maximum> 7 </maximum>
-	 <laserOffset>3.22885911619</laserOffset>
+	 <laserOffset>-5</laserOffset>
 	</angles>
 	
 	<calibration>
@@ -17,3 +41,4 @@
 		<data>0 144 0 0 0 0</data>
 	</calibration>
 </m3dUnitDriver>
+

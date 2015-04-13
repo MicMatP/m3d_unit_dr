@@ -35,11 +35,12 @@ void m3d::transferPc(m3d::rawPointcloud &raw, m3d::pointcloud &normalPc, m3d::_3
 			{
 
 				//float lasAng = float(1.0*i *(lit->profile.echoes[0].angStepWidth)  -135.0f);
-				float lasAng = float(1.0*i *(profile->echoes[0].angStepWidth)  - profile->echoes[0].startAngle);
+				//float lasAng = float(1.0*i *(profile->echoes[0].angStepWidth)  - profile->echoes[0].startAngle);
+				float lasAng = float(1.0*i *(profile->echoes[0].angStepWidth)+cfg.angularOffsetRotLaser);
 
 				float d = profile->echoes[0].data[i];
 				glm::vec4 in (d, 0.0, 0.0f, 1.0f);
-				glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f),  cfg.angularOffsetRotLaser +glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
+				glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f),  glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
 				glm::mat4 calib = cfg.calibMatrix;
 				glm::mat4 cor = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f),glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -300,11 +301,12 @@ void _3dUnitDriver::combineThread()
 				{
 
 					//float lasAng = float(1.0*i *(lit->profile.echoes[0].angStepWidth)  -135.0f);
-					float lasAng = float(1.0*i *(lit->profile.echoes[0].angStepWidth)  -lit->profile.echoes[0].startAngle);
+					//float lasAng = float(1.0*i *(lit->profile.echoes[0].angStepWidth)  -lit->profile.echoes[0].startAngle);
+					float lasAng = float(1.0*i *(lit->profile.echoes[0].angStepWidth)+angularOffsetRotLaser);
 
 					float d = lit->profile.echoes[0].data[i];
 					glm::vec4 in (d, 0.0, 0.0f, 1.0f);
-					glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f), angularOffsetRotLaser+glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
+					glm::mat4 affineLaser = glm::rotate(glm::mat4(1.0f), glm::radians(lasAng),glm::vec3(0.0f, 0.0f, 1.0f));
                     //glm::mat4 calib = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f, 0.0f, -50.0f));
 					glm::mat4 cor = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f),glm::vec3(0.0f, 1.0f, 0.0f));
 
