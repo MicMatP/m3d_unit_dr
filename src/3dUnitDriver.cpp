@@ -19,7 +19,7 @@ SET_DEBUGLVL(_PRINTOUT_INFO);
 void m3d::transferPc(m3d::rawPointcloud &raw, m3d::pointcloud &normalPc, m3d::_3dUnitConfig &cfg)
 {
 
-	std::cout <<"aaa "<<cfg.angularOffsetRotLaser;
+
 	for (int i=0; i< raw.angles.size(); i++)
 	{
 
@@ -30,7 +30,7 @@ void m3d::transferPc(m3d::rawPointcloud &raw, m3d::pointcloud &normalPc, m3d::_3
 			glm::mat4 affine3Dunit = glm::rotate(glm::mat4(1.0f),cfg.angularOffsetUnitLaser+ang, glm::vec3(0.0f, 0.0f, 1.0f));
 
 
-			auto profile = raw.ranges.begin()+i;
+			std::vector<lms_measurement>::iterator profile = raw.ranges.begin()+i;
 			for (int i =0; i <profile->echoes[0].data.size(); i++)
 			{
 

@@ -173,7 +173,7 @@ void typeSerialization::serialize(boost::property_tree::ptree &pt, glm::mat4 &m,
 void typeSerialization::saveTXT(std::string fn, m3d::pointcloud &pc)
 {
 	std::ofstream ofile;
-	ofile.open(fn);
+    ofile.open(fn.c_str());
 	if (ofile.is_open()) std::cout <<"file is opened "<< fn<<"\n";
 	for (int i=0; i < pc.data.size(); i++)
 	{

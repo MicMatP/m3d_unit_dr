@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 SET(CMAKE_BUILD_TYPE Debug)
 
 PROJECT(MANDALA_3dUnit)
-#iF YOU DOES NOT HAVE LIBRARIES IN PATH, YOU CAN EASILY DEFINE ALL HERE
-SET(BOOST_ROOT H:/Libs/boost_1_56_0/)
-SET(BOOST_LIBRARYDIR H:/Libs/boost_1_56_0/lib64-msvc-10.0)
 
 SET(PROJECT_NAME MANDALA_3dUnit)
 
@@ -54,7 +51,7 @@ MESSAGE("Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 MESSAGE("Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")  
 MESSAGE("Boost Libraries: ${Boost_LIBRARIES}") 
  
-ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
+#ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 
 
 
@@ -64,29 +61,10 @@ ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 add_library(m3d_driver_lib SHARED ${_FILES_m3d})
 #GENERATE_EXPORT_HEADER(m3d_driver_lib)
 
-#########################################################
-# Simple example
-#########################################################
-add_executable(simpleWrtier examples/simpleWrtier.cpp)
-target_link_libraries(simpleWrtier ${Boost_LIBRARIES} ${Boost_LIBRARIES} m3d_driver_lib)
-#########################################################
-# Simple example OpenGL
-#########################################################
-set (M3D_BUILD_EXAMPLE_GLUT TRUE CACHE BOOL "Build GLUT Example")
-
-if(M3D_BUILD_EXAMPLE_GLUT AND OPENGL_FOUND AND GLUT_FOUND)
-	add_executable(simpleGL examples/simpleGL.cpp)
-	target_link_libraries(simpleGL  m3d_driver_lib ${OPENGL_LIBRARIES} ${Boost_LIBRARIES} ${GLUT_LIBRARY} )
-
-endif()
-
-#file(COPY ${CMAKE_SOURCE_DIR}/sampleConfig/3dUnitCfg.xml  DESTINATION ${CMAKE_BINARY_DIR})
-
-
 
 add_subdirectory(tools/ManualCalibration)
-add_subdirectory(tools/PCLCalibration )
-add_subdirectory(tools/EncoderTest )
 add_subdirectory(tools/rawMeasurmentToTxt)
+add_subdirectory(examples)
+
 
 
