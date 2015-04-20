@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 
 #project(ManualM3DCalibration)
-SET(CMAKE_BUILD_TYPE Debug)
 
 #########################################################
 # FIND GLUT
@@ -34,11 +33,6 @@ if (M3D_BUILD_TOOL_MANUAL_CALIBRATION)
 	# Find the QtWidgets library
 	find_package(Qt5Widgets)
 	find_package(Qt5OpenGL)
-#	find_package(PCL 1.7 REQUIRED)
-
-#	include_directories(${PCL_INCLUDE_DIRS})
-#	link_directories(${PCL_LIBRARY_DIRS})
-#	add_definitions(${PCL_DEFINITIONS})
 
 	set(UI_FILES
 	    mainwindow.ui
@@ -57,10 +51,15 @@ if (M3D_BUILD_TOOL_MANUAL_CALIBRATION)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 
-	# Tell CMake to create the helloworld executable
-        add_executable(pclCalibrationManual main.cpp  mainwindow.cpp scanwindow.cpp  myglwidget.cpp ${UI_FILES})
-	qt5_use_modules(pclCalibrationManual Widgets OpenGL)
+    add_executable(CalibrationManual main.cpp  mainwindow.cpp scanwindow.cpp  myglwidget.cpp ${UI_FILES})
+	qt5_use_modules(CalibrationManual Widgets OpenGL)
 	#Link the helloworld executable to the Qt 5 widgets library.
-        target_link_libraries(pclCalibrationManual m3d_driver_lib ${OPENGL_LIBRARIES} ${Boost_LIBRARIES} ${GLUT_LIBRARY} Qt5::Widgets )
+	set_target_properties(CalibrationManual PROPERTIES DEBUG_POSTFIX d)
+    target_link_libraries(CalibrationManual m3d_driver_lib ${OPENGL_LIBRARIES} ${Boost_LIBRARIES} ${GLUT_LIBRARY} Qt5::Widgets )
 
+		install (TARGETS CalibrationManual
+         ARCHIVE DESTINATION lib
+         LIBRARY DESTINATION lib
+         RUNTIME DESTINATION bin)
 endif()
+

@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.8)
 #SET(CMAKE_BUILD_TYPE Debug)
 
-PROJECT(MANDALA_3dUnit)
+PROJECT(M3dUnit)
 
-SET(PROJECT_NAME MANDALA_3dUnit)
+SET(PROJECT_NAME M3dUnit)
 
  
 set(MANDALA_3DUNIT_MAJOR_VERSION 0)
@@ -21,7 +21,6 @@ ENDIF()
 # add sources of library
 SET(_FILES_m3d src/lms_mini_lib.cpp src/3dUnitDriver.cpp src/encoder_driver.cpp src/3dUnitTypeSerialization.cpp )
 SET(_HEADERS_m3d hpp/lms_mini_lib.hpp src/3dUnitDriver.hpp src/encoder_driver.hpp )
-
 
 #########################################################
 # FIND GLUT
@@ -58,8 +57,7 @@ MESSAGE("Boost information")
 MESSAGE("Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")  
 MESSAGE("Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")  
 MESSAGE("Boost Libraries: ${Boost_LIBRARIES}") 
- 
-#ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
+ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 
 
 
@@ -69,17 +67,57 @@ MESSAGE("Boost Libraries: ${Boost_LIBRARIES}")
 add_library(m3d_driver_lib SHARED ${_FILES_m3d})
 
 
-
 add_subdirectory(tools/ManualCalibration)
 add_subdirectory(tools/rawMeasurmentToTxt)
 add_subdirectory(examples)
 
-install (TARGETS m3d_driver_lib LIBRARY DESTINATION lib)
-
+set_target_properties(m3d_driver_lib PROPERTIES 
+	DEBUG_POSTFIX d
+	PUBLIC_HEADER  ${_HEADERS_m3d}
+	)
+install (TARGETS m3d_driver_lib
+         ARCHIVE DESTINATION lib
+         LIBRARY DESTINATION lib
+         RUNTIME DESTINATION bin
+		 PUBLIC_HEADER DESTINATION include
+		 INCLUDES DESTINATION include)
+		 
 install (DIRECTORY hpp/ DESTINATION include FILES_MATCHING PATTERN "*.h*")
+set(m3dunit_INCLUDE_DIRS "include")
 
-export(TARGETS m3d_driver_lib FILE "${PROJECT_BINARY_DIR}/MANDALA_3dUnit-config.cmake")
-export(PACKAGE MANDALA_3dUnit)
+include(CMakePackageConfigHelpers)
 
 
-install(FILES "${PROJECT_BINARY_DIR}/MANDALA_3dUnit-config.cmake" DESTINATION lib)
+write_basic_package_version_file(m3dunitVersion.cmake VERSION 0.0.1 COMPATIBILITY AnyNewerVersion)
+
+
+configure_package_config_file (m3dunitConfig.cmake.in ${CMAKE_BINARY_DIR}/m3dunitConfig.cmake
+								INSTALL_DESTINATION ${CMAKE_BINARY_DIR}
+								PATH_VARS m3dunit_INCLUDE_DIRS)
+export ( TARGETS m3d_driver_lib FILE "${CMAKE_BINARY_DIR}/m3dunitTargets.cmake" )
+export ( PACKAGE m3dunit ) 
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/m3dunitConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/m3dunitVersion.cmake
+        DESTINATION lib )
+		
+#install(FILES "${PROJECT_BINARY_DIR}/m3dunit-config.cmake" DESTINATION lib)
+
+#install(EXPORT m3dunitTargets FILE "m3dunitTargets.cmake" DESTINATION lib)
+#CPACK (windows)
+IF (WIN32)
+
+SET(_BOOST_DLL_TO_COPY ${BOOST_LIBRARY_DIR}/ src/3dUnitDriver.hpp src/encoder_driver.hpp )
+
+set(CPACK_GENERATOR NSIS)
+set(CPACK_PACKAGE_NAME "Mandala Universal Driver")
+set(CPACK_PACKAGE_VENDOR "mandalarobotics.com")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mandala Universal Driver")
+set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "Mandala Universal Driver")
+SET(CPACK_NSIS_MODIFY_PATH ON)
+
+INCLUDE(CPack)
+
+endif()
