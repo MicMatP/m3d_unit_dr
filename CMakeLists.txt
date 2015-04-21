@@ -82,7 +82,7 @@ install (TARGETS m3d_driver_lib
 		 PUBLIC_HEADER DESTINATION include
 		 INCLUDES DESTINATION include)
 		 
-install (DIRECTORY hpp/ DESTINATION include FILES_MATCHING PATTERN "*.h*")
+install (DIRECTORY hpp/ DESTINATION include)
 set(m3dunit_INCLUDE_DIRS "include")
 
 include(CMakePackageConfigHelpers)
@@ -92,16 +92,16 @@ write_basic_package_version_file(m3dunitVersion.cmake VERSION 0.0.1 COMPATIBILIT
 
 
 configure_package_config_file (m3dunitConfig.cmake.in ${CMAKE_BINARY_DIR}/m3dunitConfig.cmake
-								INSTALL_DESTINATION ${CMAKE_BINARY_DIR}
+								INSTALL_DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
 								PATH_VARS m3dunit_INCLUDE_DIRS)
 export ( TARGETS m3d_driver_lib FILE "${CMAKE_BINARY_DIR}/m3dunitTargets.cmake" )
 export ( PACKAGE m3dunit ) 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/m3dunitConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/m3dunitVersion.cmake
-        DESTINATION lib )
+        DESTINATION  "cmake")
 		
 #install(FILES "${PROJECT_BINARY_DIR}/m3dunit-config.cmake" DESTINATION lib)
 
-#install(EXPORT m3dunitTargets FILE "m3dunitTargets.cmake" DESTINATION lib)
+install(FILES "${PROJECT_BINARY_DIR}/m3dunitTargets.cmake" DESTINATION "cmake")
 #CPACK (windows)
 IF (WIN32)
 

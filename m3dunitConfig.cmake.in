@@ -1,6 +1,9 @@
 @PACKAGE_INIT@ 
 
 find_package(Boost COMPONENTS system thread filesystem date_time REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+SET (m3dunit_LIBARIES m3d_driver_lib ${Boost_LIBRARIES} )
 set_and_check(m3dunit_INCLUDE_DIR "@PACKAGE_m3dunit_INCLUDE_DIRS@")
+link_directories(${Boost_LIBRARY_DIRS})
 
 include ( "${CMAKE_CURRENT_LIST_DIR}/m3dunitTargets.cmake" )
