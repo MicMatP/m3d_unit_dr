@@ -108,7 +108,7 @@ void savePointcloud()
 		m3d::typeSerialization::serialize(pt,raw, "raw1");
 		std::cout << "saving \n";
 
-		write_xml(fn, pt, std::locale(), boost::property_tree::xml_writer_make_settings(' ', 1u));
+		write_xml(fn, pt);
 		std::cout << "DONE! \n";
 		glutSetWindowTitle("done!");
 	}
@@ -145,8 +145,7 @@ void display()
 	glScalef(0.01*scale, 0.01*scale,0.01*scale);
 	glRotatef(90,0,1,0);
 
-	// Draw the teapot
-	//glutSolidTeapot(1);
+
 	std::string actualprogress = boost::lexical_cast<std::string,int>(100*driver->getCurrentProgress());
 	actualprogress = "actual progress "+actualprogress+"%";
 	if (!driver->get_is_initialized()) actualprogress = "SENSOR PAUSED";
