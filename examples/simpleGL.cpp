@@ -81,7 +81,7 @@ void savePointcloud()
 		saveRequestTXT = false;
 		std::ofstream ofile;
 		std::string fn = getDateTimeFileName()+".txt";
-		ofile.open(fn);
+		ofile.open(fn.c_str());
 		if (ofile.is_open()) std::cout <<"file is opened "<< fn<<"\n";
 		for (int i=0; i < pc.data.size(); i++)
 		{
@@ -108,7 +108,7 @@ void savePointcloud()
 		m3d::typeSerialization::serialize(pt,raw, "raw1");
 		std::cout << "saving \n";
 
-		write_xml(fn, pt, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>(' ', 1u));
+		write_xml(fn, pt, std::locale(), boost::property_tree::xml_writer_make_settings(' ', 1u));
 		std::cout << "DONE! \n";
 		glutSetWindowTitle("done!");
 	}
@@ -334,7 +334,8 @@ int main(int argc, char **argv)
 
 		win.width = 640;
 		win.height = 480;
-		win.title = "OpenGL/GLUT Example.";
+		char title[] = "OpenGL/GLUT Example.";
+		win.title = title;
 		win.field_of_view_angle = 45;
 		win.z_near = 1.0f;
 		win.z_far = 500.0f;
